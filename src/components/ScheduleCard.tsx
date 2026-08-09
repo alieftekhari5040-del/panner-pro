@@ -5,7 +5,7 @@ import { Check, Plus, Trash2 } from 'lucide-react';
 interface ScheduleCardProps {
   schedule: ScheduleSlot[];
   onChangeTask: (id: string, text: string) => void;
-  onChangeTime: (id: string, time: string) => void;
+  onChangeTime?: (id: string, time: string) => void;
   onToggleSlot: (id: string) => void;
   onAddSlot: () => void;
   onRemoveSlot: (id: string) => void;
@@ -14,7 +14,6 @@ interface ScheduleCardProps {
 export const ScheduleCard: React.FC<ScheduleCardProps> = ({
   schedule,
   onChangeTask,
-  onChangeTime,
   onToggleSlot,
   onAddSlot,
   onRemoveSlot,
@@ -32,76 +31,65 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
         <button
           onClick={onAddSlot}
           className="no-print flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-950/40 hover:bg-purple-800/60 border border-purple-500/30 text-purple-300 text-xs transition-all"
-          title="افزودن بازه زمانی جدید"
+          title="افزودن ردیف جدید"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>بازه زمانی</span>
+          <span>ردیف جدید</span>
         </button>
       </div>
 
-      {/* Table Container (neon-inner-box with horizontal grid rows) */}
+      {/* Table Container (neon-inner-box with horizontal grid rows matching poster 100%) */}
       <div className="neon-inner-box overflow-hidden flex-1 flex flex-col divide-y divide-purple-500/25">
-        {schedule.map((slot, index) => (
+        {schedule.map((slot) => (
           <div
             key={slot.id}
-            className={`flex items-center gap-2 sm:gap-4 p-2.5 sm:p-3 transition-colors ${
+            className={`flex items-center justify-between gap-3 p-3 sm:p-3.5 transition-colors ${
               slot.completed
                 ? 'bg-purple-950/40'
                 : 'hover:bg-purple-900/15'
             }`}
           >
-            {/* Row index or status checkbox on right */}
-            <button
-              onClick={() => onToggleSlot(slot.id)}
-              className={`w-5 h-5 rounded flex items-center justify-center transition-all duration-200 border shrink-0 ${
-                slot.completed
-                  ? 'bg-purple-500 border-purple-300 text-white shadow-[0_0_10px_rgba(168,85,247,0.7)]'
-                  : 'bg-purple-950/30 border-purple-400/50 hover:border-purple-300'
-              }`}
-              title={slot.completed ? 'انجام شد' : 'علامت به عنوان انجام‌شده'}
-            >
-              {slot.completed && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-            </button>
-
-            {/* Time slot column */}
-            <div className="w-24 sm:w-28 shrink-0">
-              <input
-                type="text"
-                value={slot.time}
-                onChange={(e) => onChangeTime(slot.id, e.target.value)}
-                placeholder="ساعت..."
-                className="w-full bg-purple-950/30 border border-purple-500/20 rounded-md py-0.5 px-1.5 text-center text-xs sm:text-sm font-medium text-purple-200 focus:border-purple-300 outline-none transition-all"
-              />
-            </div>
-
-            {/* Vertical column divider */}
-            <div className="w-px h-6 bg-purple-500/30 shrink-0" />
-
-            {/* Wide activity / task input column */}
-            <div className="flex-1">
+            {/* Wide activity / task input column on right (RTL) */}
+            <div className="flex-1 flex items-center gap-2">
               <input
                 type="text"
                 value={slot.task}
                 onChange={(e) => onChangeTask(slot.id, e.target.value)}
-                placeholder="برنامه یا فعالیت در این بازه زمانی..."
+                placeholder="برنامه یا فعالیت امروز را بنویسید..."
                 className={`w-full bg-transparent text-sm sm:text-base outline-none transition-all ${
                   slot.completed
                     ? 'text-purple-300/60 line-through'
-                    : 'text-purple-100 placeholder-purple-400/30'
+                    : 'text-purple-100 placeholder-purple-400/40'
                 }`}
               />
             </div>
 
-            {/* Remove custom slot button (if more than 5 slots) */}
-            {schedule.length > 5 && (
+            {/* Vertical column divider matching the poster */}
+            <div className="w-px h-6 bg-purple-500/30 shrink-0 mx-1 sm:mx-2" />
+
+            {/* Completion checkbox on left (RTL) + optional delete */}
+            <div className="flex items-center gap-2">
+              {schedule.length > 5 && (
+                <button
+                  onClick={() => onRemoveSlot(slot.id)}
+                  className="no-print opacity-0 hover:opacity-100 focus:opacity-100 text-purple-400/50 hover:text-red-400 p-1 transition-all"
+                  title="حذف این ردیف"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
-                onClick={() => onRemoveSlot(slot.id)}
-                className="no-print opacity-0 hover:opacity-100 focus:opacity-100 text-purple-400/50 hover:text-red-400 p-1 transition-all"
-                title="حذف این ردیف"
+                onClick={() => onToggleSlot(slot.id)}
+                className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 border-2 shrink-0 ${
+                  slot.completed
+                    ? 'bg-purple-500 border-purple-300 text-white shadow-[0_0_10px_rgba(168,85,247,0.8)]'
+                    : 'bg-purple-950/30 border-purple-400/60 hover:border-purple-300'
+                }`}
+                title={slot.completed ? 'انجام شد' : 'علامت به عنوان انجام‌شده'}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                {slot.completed && <Check className="w-4 h-4 stroke-[3]" />}
               </button>
-            )}
+            </div>
           </div>
         ))}
       </div>

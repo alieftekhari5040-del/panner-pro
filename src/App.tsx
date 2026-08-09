@@ -165,14 +165,13 @@ export default function App() {
 
   // Handler: Add Schedule Slot
   const handleAddSlot = () => {
-    const nextHour = data.schedule.length + 6;
     setData((prev) => ({
       ...prev,
       schedule: [
         ...prev.schedule,
         {
           id: `slot_${Date.now()}`,
-          time: `${nextHour}:۰۰ - ${nextHour + 1}:۰۰`,
+          time: '',
           task: '',
           completed: false,
         },
