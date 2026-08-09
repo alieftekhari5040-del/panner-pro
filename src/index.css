@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Vazirmatn', 'Shabnam', sans-serif;
+    background: radial-gradient(circle at 50% -20%, #1e1147 0%, #0c0722 50%, #070514 100%);
+    color: #f3f4f6;
+    min-height: 100vh;
+  }
+}
+
+/* Custom glow borders and animations */
+.neon-box {
+  background: rgba(18, 11, 44, 0.65);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  box-shadow: 
+    0 0 15px rgba(139, 92, 246, 0.18),
+    inset 0 0 15px rgba(139, 92, 246, 0.05);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  transition: all 0.25s ease;
+}
+
+.neon-box:hover {
+  border-color: rgba(168, 85, 247, 0.75);
+  box-shadow: 
+    0 0 25px rgba(168, 85, 247, 0.35),
+    inset 0 0 20px rgba(139, 92, 246, 0.12);
+}
+
+.neon-inner-box {
+  background: rgba(13, 8, 32, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 0.75rem;
+  box-shadow: inset 0 0 10px rgba(139, 92, 246, 0.15);
+}
+
+.neon-input-line {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed rgba(139, 92, 246, 0.5);
+  color: #f3f4f6;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.neon-input-line:focus {
+  border-bottom: 1px solid rgba(192, 132, 252, 0.9);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #070514;
+}
+::-webkit-scrollbar-thumb {
+  background: #6d28d9;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8b5cf6;
+}
+
+/* Printable styles for Poster export */
+@media print {
+  body {
+    background: #070514 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .neon-box {
+    box-shadow: none !important;
+    border: 1.5px solid #8b5cf6 !important;
+  }
+}
