@@ -307,17 +307,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-center p-3 sm:p-6 md:p-8">
-      {/* Dynamic Animated Ambient Aurora & Glow Orbs */}
+      {/* Calm, Static Ambient Background Glow */}
       <div className="fixed inset-0 pointer-events-none -z-10 bg-[#070514] overflow-hidden">
-        <div className="absolute top-[-15%] right-[15%] w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[140px] animate-aurora" />
-        <div className="absolute bottom-[-15%] left-[10%] w-[550px] h-[550px] bg-indigo-900/25 rounded-full blur-[160px] animate-aurora" style={{ animationDelay: '4s' }} />
-        <div className="absolute top-[35%] left-[50%] -translate-x-1/2 w-[650px] h-[350px] bg-purple-600/15 rounded-full blur-[180px] animate-aurora" style={{ animationDelay: '8s' }} />
+        <div className="absolute top-[-10%] right-[15%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-10%] left-[10%] w-[550px] h-[550px] bg-indigo-950/30 rounded-full blur-[160px]" />
+        <div className="absolute top-[35%] left-[50%] -translate-x-1/2 w-[650px] h-[350px] bg-purple-800/10 rounded-full blur-[180px]" />
       </div>
 
-      {/* Main Printable Planner Board Container */}
+      {/* Main Printable Planner Board Container: STABLE, SOLID, NO MOVEMENT/SHAKING */}
       <div
         ref={boardRef}
-        className="w-full max-w-[1180px] bg-[#0c081e]/85 border-2 border-purple-500/60 rounded-3xl p-4 sm:p-7 md:p-9 shadow-[0_0_60px_rgba(139,92,246,0.3)] backdrop-blur-2xl relative transition-all animate-float"
+        className="w-full max-w-[1180px] bg-[#0c081e]/90 border-2 border-purple-500/50 rounded-3xl p-4 sm:p-7 md:p-9 shadow-[0_0_50px_rgba(139,92,246,0.25)] backdrop-blur-2xl relative"
       >
         {/* Header & Controls */}
         <Header
@@ -394,7 +394,7 @@ export default function App() {
 
       {/* Export loading badge */}
       {isExporting && (
-        <div className="fixed bottom-6 left-6 z-50 bg-purple-900/95 border border-purple-400 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-sm flex items-center gap-2.5 animate-bounce">
+        <div className="fixed bottom-6 left-6 z-50 bg-purple-900/95 border border-purple-400 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-sm flex items-center gap-2.5">
           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           <span>در حال تولید پوستر با کیفیت بالا...</span>
         </div>

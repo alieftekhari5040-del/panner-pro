@@ -21,22 +21,22 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
 
   return (
     <div className="neon-box p-5 sm:p-6 flex flex-col gap-4">
-      {/* Card Title with Red/Orange indicator pill on right (RTL) & Add Task button */}
+      {/* Card Title & Add Task button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="inline-block w-1.5 h-5 bg-gradient-to-b from-orange-400 to-red-500 rounded-full shadow-[0_0_12px_rgba(249,115,22,0.9)] animate-pulse" />
+          <span className="inline-block w-1.5 h-5 bg-gradient-to-b from-orange-400 to-red-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
           <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide">
             اولویت کارها
           </h2>
           {priorities.length > 0 && (
-            <span className="no-print text-[11px] font-bold bg-purple-900/50 border border-purple-400/30 text-purple-200 px-2 py-0.5 rounded-full">
+            <span className="no-print text-[11px] font-bold bg-purple-900/50 border border-purple-400/30 text-purple-200 px-2.5 py-0.5 rounded-full">
               {completedCount} از {priorities.length}
             </span>
           )}
         </div>
         <button
           onClick={onAddPriority}
-          className="no-print flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/50 hover:bg-purple-800/70 border border-purple-500/40 text-purple-200 hover:text-white text-xs transition-all shadow-sm hover:scale-105"
+          className="no-print flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-950/50 hover:bg-purple-800/70 border border-purple-500/40 text-purple-200 hover:text-white text-xs transition-colors shadow-sm"
           title="افزودن کار یا اولویت جدید"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -45,16 +45,16 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
       </div>
 
       {/* List of priority rows */}
-      <div className="flex flex-col gap-3 mt-2">
+      <div className="flex flex-col gap-3 mt-1">
         {priorities.map((task) => (
-          <div key={task.id} className="row-interactive flex items-center gap-3 p-2 rounded-xl group">
+          <div key={task.id} className="row-interactive flex items-center gap-3 p-2.5 rounded-xl group">
             {/* Square rounded checkbox on right (RTL) */}
             <button
               onClick={() => onToggle(task.id)}
-              className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-300 border-2 shrink-0 ${
+              className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 border-2 shrink-0 ${
                 task.completed
-                  ? 'bg-purple-500 border-purple-300 text-white shadow-[0_0_14px_rgba(168,85,247,0.9)] scale-105'
-                  : 'bg-purple-950/30 border-purple-400/60 hover:border-purple-300 hover:scale-105'
+                  ? 'bg-purple-500 border-purple-300 text-white shadow-[0_0_10px_rgba(168,85,247,0.7)]'
+                  : 'bg-purple-950/40 border-purple-400/60 hover:border-purple-300'
               }`}
               title={task.completed ? 'انجام شد' : 'علامت به عنوان انجام‌شده'}
             >
@@ -68,7 +68,7 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
                 value={task.text}
                 onChange={(e) => onChangeText(task.id, e.target.value)}
                 placeholder="کاری که امروز باید انجام شود..."
-                className={`w-full bg-transparent pb-1 px-1 text-sm sm:text-base border-b border-purple-500/40 focus:border-purple-300 outline-none transition-all ${
+                className={`w-full bg-transparent pb-1 px-1 text-sm sm:text-base border-b border-purple-500/40 focus:border-purple-300 outline-none transition-colors ${
                   task.completed
                     ? 'text-purple-300/60 line-through'
                     : 'text-purple-100 placeholder-purple-400/40'
@@ -79,7 +79,7 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
             {/* Remove task button on hover */}
             <button
               onClick={() => onRemovePriority(task.id)}
-              className="no-print opacity-0 group-hover:opacity-100 focus:opacity-100 text-purple-400/60 hover:text-red-400 p-1.5 transition-all hover:scale-110"
+              className="no-print opacity-0 group-hover:opacity-100 focus:opacity-100 text-purple-400/60 hover:text-red-400 p-1.5 transition-colors shrink-0"
               title="حذف این کار"
             >
               <Trash2 className="w-4 h-4" />
