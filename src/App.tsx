@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import html2canvas from 'html2canvas';
 import type { DayPlannerData, WeekdayName } from './types';
 import { loadDayData, saveDayData, resetDayData } from './utils/storage';
-import { getTodayWeekdayName, getJalaliStringForWeekday, getNextWeekdayName } from './utils/jalali';
+import { getTodayWeekdayName, getJalaliStringForWeekday, getNextWeekdayName, ALL_WEEKDAYS } from './utils/jalali';
 import { playCheckSound } from './utils/sound';
 import { Header } from './components/Header';
 import { Tabs, type TabId } from './components/Tabs';
@@ -13,35 +13,28 @@ import { GoalsCard } from './components/GoalsCard';
 import { ScheduleCard } from './components/ScheduleCard';
 import { LessonsCard } from './components/LessonsCard';
 import { FooterBar } from './components/FooterBar';
-import { InstallModal } from './components/InstallModal';
 import { StorageModal } from './components/StorageModal';
 import { ShortcutsModal } from './components/ShortcutsModal';
-import { QuickNoteModal } from './components/QuickNoteModal';
 import { HabitTrackerView } from './components/HabitTrackerView';
 import { StatsAnalyticsView } from './components/StatsAnalyticsView';
 
+const LAST_WEEKDAY_KEY = 'ascent_blueprint_last_weekday';
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('today');
-  const [activeWeekday, setActiveWeekday] = useState<WeekdayName>(() => getTodayWeekdayName());
+  const [activeWeekday, setActiveWeekday] = useState<WeekdayName>(() => {
+    try {
+      const last = localStorage.getItem(LAST_WEEKDAY_KEY) as WeekdayName;
+      if (last && ALL_WEEKDAYS.includes(last)) return last;
+    } catch {}
+    return getTodayWeekdayName();
+  });
   const [data, setData] = useState<DayPlannerData>(() => loadDayData(activeWeekday));
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
-  const [isQuickNoteModalOpen, setIsQuickNoteModalOpen] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
-
-  // Listen for PWA desktop install prompt
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
 
   // Global Keyboard Shortcuts for Laptop Users
   useEffect(() => {
@@ -55,9 +48,6 @@ export default function App() {
       } else if (e.altKey && e.key === '3') {
         e.preventDefault();
         setActiveTab('stats');
-      } else if (e.altKey && (e.key === 'n' || e.key === 'N' || e.key === 'ن')) {
-        e.preventDefault();
-        setIsQuickNoteModalOpen((prev) => !prev);
       } else if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
         e.preventDefault();
         saveDayData(data);
@@ -70,6 +60,9 @@ export default function App() {
 
   // When activeWeekday changes, load data from storage and ensure date matches that weekday
   useEffect(() => {
+    try {
+      localStorage.setItem(LAST_WEEKDAY_KEY, activeWeekday);
+    } catch {}
     const loaded = loadDayData(activeWeekday);
     const expectedDate = getJalaliStringForWeekday(activeWeekday);
     setData({
@@ -78,12 +71,12 @@ export default function App() {
     });
   }, [activeWeekday]);
 
-  // Auto-save data on every change
+  // AUTOMATIC BROWSER SAVING ON EVERY CHANGE
   useEffect(() => {
     saveDayData(data);
   }, [data]);
 
-  // Calculate Progress Percent: 100% Dedicated to Today's Schedule (برنامه‌ی امروز) as requested
+  // Calculate Progress Percent: Dedicated 100% to Today's Schedule (برنامه‌ی امروز) as requested
   const totalScheduleCount = data.schedule.length;
   const completedScheduleCount = data.schedule.filter((s) => s.completed).length;
 
@@ -322,22 +315,6 @@ export default function App() {
     }
   };
 
-  // Handler: Print / Save PDF
-  const handlePrint = () => {
-    window.print();
-  };
-
-  // Handler: Trigger Native Desktop Install
-  const handleTriggerNativeInstall = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    if (choice && choice.outcome === 'accepted') {
-      setDeferredPrompt(null);
-      setIsInstallModalOpen(false);
-    }
-  };
-
   // Handler: Reload when data restored from import
   const handleDataRestored = () => {
     const loaded = loadDayData(activeWeekday);
@@ -367,12 +344,8 @@ export default function App() {
           onToggleSound={() => setSoundEnabled(!soundEnabled)}
           onReset={handleReset}
           onExportPng={handleExportPng}
-          onPrint={handlePrint}
-          onOpenInstallModal={() => setIsInstallModalOpen(true)}
           onOpenStorageModal={() => setIsStorageModalOpen(true)}
           onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
-          onOpenQuickNoteModal={() => setIsQuickNoteModalOpen(true)}
-          isInstallReady={!!deferredPrompt}
         />
 
         {/* 3-Tab Navigation Switcher (No-print) */}
@@ -442,14 +415,6 @@ export default function App() {
         <FooterBar />
       </div>
 
-      {/* Install on Desktop PWA Modal */}
-      <InstallModal
-        isOpen={isInstallModalOpen}
-        onClose={() => setIsInstallModalOpen(false)}
-        onTriggerNativeInstall={handleTriggerNativeInstall}
-        isNativePromptReady={!!deferredPrompt}
-      />
-
       {/* Persistent Storage Backup/Restore Modal */}
       <StorageModal
         isOpen={isStorageModalOpen}
@@ -461,12 +426,6 @@ export default function App() {
       <ShortcutsModal
         isOpen={isShortcutsModalOpen}
         onClose={() => setIsShortcutsModalOpen(false)}
-      />
-
-      {/* Personal Quick Note / Sticky Scratchpad Modal */}
-      <QuickNoteModal
-        isOpen={isQuickNoteModalOpen}
-        onClose={() => setIsQuickNoteModalOpen(false)}
       />
 
       {/* Export loading badge */}

@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Download,
-  Printer,
   RotateCcw,
   Volume2,
   VolumeX,
   Sparkles,
-  Monitor,
   Zap,
   HardDrive,
   User,
   Clock as ClockIcon,
   Keyboard,
-  FileText,
   Edit2,
-  CheckCircle2,
 } from 'lucide-react';
 import { playCheckSound } from '../utils/sound';
 
@@ -26,12 +22,8 @@ interface HeaderProps {
   onToggleSound: () => void;
   onReset: () => void;
   onExportPng: () => void;
-  onPrint: () => void;
-  onOpenInstallModal: () => void;
   onOpenStorageModal: () => void;
   onOpenShortcutsModal: () => void;
-  onOpenQuickNoteModal: () => void;
-  isInstallReady?: boolean;
 }
 
 const PROFILE_NAME_KEY = 'ascent_blueprint_profile_name';
@@ -44,14 +36,10 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSound,
   onReset,
   onExportPng,
-  onPrint,
-  onOpenInstallModal,
   onOpenStorageModal,
   onOpenShortcutsModal,
-  onOpenQuickNoteModal,
-  isInstallReady,
 }) => {
-  // Personalized Profile Name
+  // Personalized Profile Name (saved to localStorage automatically)
   const [profileName, setProfileName] = useState(() => {
     try {
       return localStorage.getItem(PROFILE_NAME_KEY) || 'علی افتخاری';
@@ -172,36 +160,16 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Minimalist Action Controls */}
         <div className="flex flex-wrap items-center gap-1.5">
-          {/* Permanent Reassuring AUTO-SAVE ACTIVE Indicator Badge */}
-          <div
-            onClick={onOpenStorageModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-xs font-bold text-emerald-300 cursor-pointer hover:bg-emerald-900/60 transition-colors shadow-sm"
-            title="تمامی اطلاعات و تغییرات شما به‌صورت خودکار در مرورگر ذخیره می‌شوند (کلیک برای پشتیبان‌گیری)"
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
-            <span>ذخیره خودکار فعال ✅</span>
-          </div>
-
-          {/* Backup / Restore Button */}
+          {/* Backup/Restore JSON button */}
           <button
             onClick={onOpenStorageModal}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
-            title="تهیه فایل پشتیبان از تمام داده‌ها (Backup / Restore JSON)"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            title="تهیه فایل پشتیبان از تمام داده‌های برنامه (JSON Backup/Restore)"
           >
             <HardDrive className="w-3.5 h-3.5 text-purple-300" />
-            <span className="hidden sm:inline">پشتیبان‌گیری</span>
-          </button>
-
-          {/* Quick Note Scratchpad */}
-          <button
-            onClick={onOpenQuickNoteModal}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
-            title="دفترچه یادداشت شخصی (Alt + N)"
-          >
-            <FileText className="w-3.5 h-3.5 text-pink-300" />
-            <span className="hidden sm:inline">یادداشت سریع</span>
+            <span>پشتیبان‌گیری</span>
           </button>
 
           {/* Shortcuts Help */}
@@ -213,36 +181,14 @@ export const Header: React.FC<HeaderProps> = ({
             <Keyboard className="w-4 h-4 text-purple-300" />
           </button>
 
-          {/* Install on Desktop button */}
-          <button
-            onClick={onOpenInstallModal}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors border shadow-sm ${
-              isInstallReady
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-purple-300'
-                : 'bg-purple-900/50 hover:bg-purple-800/70 border-purple-400/30 text-purple-100'
-            }`}
-            title="نصب اپلیکیشن روی دسکتاپ (Windows / Mac / Linux)"
-          >
-            <Monitor className="w-3.5 h-3.5" />
-            <span>نصب روی دسکتاپ</span>
-          </button>
-
+          {/* Export as PNG poster */}
           <button
             onClick={onExportPng}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
             title="دانلود به عنوان عکس پوستر (PNG)"
           >
             <Download className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">خروجی عکس</span>
-          </button>
-
-          <button
-            onClick={onPrint}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-xs font-medium text-purple-200 transition-colors"
-            title="چاپ یا ذخیره به عنوان PDF (Ctrl + P)"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">چاپ</span>
+            <span>خروجی عکس (PNG)</span>
           </button>
 
           <button
