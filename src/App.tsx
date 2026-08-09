@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import html2canvas from 'html2canvas';
 import type { DayPlannerData, WeekdayName } from './types';
 import { loadDayData, saveDayData, resetDayData } from './utils/storage';
 import { getTodayWeekdayName, getJalaliStringForWeekday, getNextWeekdayName, ALL_WEEKDAYS } from './utils/jalali';
@@ -13,7 +12,6 @@ import { GoalsCard } from './components/GoalsCard';
 import { ScheduleCard } from './components/ScheduleCard';
 import { LessonsCard } from './components/LessonsCard';
 import { FooterBar } from './components/FooterBar';
-import { StorageModal } from './components/StorageModal';
 import { ShortcutsModal } from './components/ShortcutsModal';
 import { HabitTrackerView } from './components/HabitTrackerView';
 import { StatsAnalyticsView } from './components/StatsAnalyticsView';
@@ -31,8 +29,6 @@ export default function App() {
   });
   const [data, setData] = useState<DayPlannerData>(() => loadDayData(activeWeekday));
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isExporting, setIsExporting] = useState(false);
-  const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
 
@@ -48,10 +44,6 @@ export default function App() {
       } else if (e.altKey && e.key === '3') {
         e.preventDefault();
         setActiveTab('stats');
-      } else if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        saveDayData(data);
-        setIsStorageModalOpen(true);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -289,38 +281,6 @@ export default function App() {
     }
   };
 
-  // Handler: Export as PNG Poster
-  const handleExportPng = async () => {
-    if (!boardRef.current) return;
-    setIsExporting(true);
-    try {
-      boardRef.current.classList.add('exporting-poster');
-      const canvas = await html2canvas(boardRef.current, {
-        backgroundColor: '#070514',
-        scale: 2, // High resolution poster
-        useCORS: true,
-        logging: false,
-      });
-      boardRef.current.classList.remove('exporting-poster');
-
-      const image = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = `Ascent-Blueprint-Planner-${activeWeekday}.png`;
-      link.click();
-    } catch (err) {
-      console.error('Failed to export image:', err);
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // Handler: Reload when data restored from import
-  const handleDataRestored = () => {
-    const loaded = loadDayData(activeWeekday);
-    setData(loaded);
-  };
-
   return (
     <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-start sm:justify-center p-3 sm:p-5 md:p-6">
       {/* Calm, Static Ambient Background Glow */}
@@ -343,8 +303,6 @@ export default function App() {
           soundEnabled={soundEnabled}
           onToggleSound={() => setSoundEnabled(!soundEnabled)}
           onReset={handleReset}
-          onExportPng={handleExportPng}
-          onOpenStorageModal={() => setIsStorageModalOpen(true)}
           onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
         />
 
@@ -380,7 +338,7 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
                 <PrioritiesCard
                   priorities={data.priorities}
-                  onToggle={handleTogglePriority}
+                  onTogglePriority={handleTogglePriority}
                   onChangeText={handleChangePriorityText}
                   onAddPriority={handleAddPriority}
                   onRemovePriority={handleRemovePriority}
@@ -415,26 +373,11 @@ export default function App() {
         <FooterBar />
       </div>
 
-      {/* Persistent Storage Backup/Restore Modal */}
-      <StorageModal
-        isOpen={isStorageModalOpen}
-        onClose={() => setIsStorageModalOpen(false)}
-        onDataRestored={handleDataRestored}
-      />
-
       {/* Keyboard Shortcuts Help Modal */}
       <ShortcutsModal
         isOpen={isShortcutsModalOpen}
         onClose={() => setIsShortcutsModalOpen(false)}
       />
-
-      {/* Export loading badge */}
-      {isExporting && (
-        <div className="fixed bottom-6 left-6 z-50 bg-purple-900/95 border border-purple-400 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-sm flex items-center gap-2.5">
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          <span>در حال تولید پوستر با کیفیت بالا...</span>
-        </div>
-      )}
     </div>
   );
 }

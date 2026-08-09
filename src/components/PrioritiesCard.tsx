@@ -4,7 +4,8 @@ import { Check, Plus, Trash2 } from 'lucide-react';
 
 interface PrioritiesCardProps {
   priorities: PriorityTask[];
-  onToggle: (id: string) => void;
+  onToggle?: (id: string) => void;
+  onTogglePriority?: (id: string) => void;
   onChangeText: (id: string, text: string) => void;
   onAddPriority: () => void;
   onRemovePriority: (id: string) => void;
@@ -13,11 +14,13 @@ interface PrioritiesCardProps {
 export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
   priorities,
   onToggle,
+  onTogglePriority,
   onChangeText,
   onAddPriority,
   onRemovePriority,
 }) => {
   const completedCount = priorities.filter((p) => p.completed).length;
+  const handleToggle = onToggle || onTogglePriority || (() => {});
 
   return (
     <div className="neon-box p-5 sm:p-6 flex flex-col gap-4 h-full">
@@ -50,7 +53,7 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
           <div key={task.id} className="row-interactive flex items-center gap-3 p-2.5 rounded-xl group">
             {/* Square rounded checkbox on right (RTL) */}
             <button
-              onClick={() => onToggle(task.id)}
+              onClick={() => handleToggle(task.id)}
               className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all duration-200 border-2 shrink-0 ${
                 task.completed
                   ? 'bg-purple-500 border-purple-300 text-white shadow-[0_0_10px_rgba(168,85,247,0.7)]'
