@@ -18,6 +18,8 @@ import {
 
 interface HeaderProps {
   progressPercent: number;
+  completedScheduleCount: number;
+  totalScheduleCount: number;
   soundEnabled: boolean;
   onToggleSound: () => void;
   onReset: () => void;
@@ -34,6 +36,8 @@ const PROFILE_NAME_KEY = 'ascent_blueprint_profile_name';
 
 export const Header: React.FC<HeaderProps> = ({
   progressPercent,
+  completedScheduleCount,
+  totalScheduleCount,
   soundEnabled,
   onToggleSound,
   onReset,
@@ -85,20 +89,20 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  // Dynamic daily motivation based on completion percent
+  // Dynamic daily motivation based on completion percent of Today's Schedule
   const getMotivationalQuote = (percent: number) => {
-    if (percent === 100) return 'تکمیل ۱۰۰٪! امروز قله را فتح کردی! 🏆';
-    if (percent >= 75) return 'فقط چند قدم تا قله باقی مانده؛ ادامه بده! ⚡';
-    if (percent >= 40) return 'مسیر صعود هموار است؛ عالی پیش می‌روی! 🔥';
-    if (percent > 0) return 'شروعی پرقدرت؛ قدم‌های اول برداشته شد! 🚀';
-    return 'هر روز یک قدم جلوتر؛ برنامه امروزت را بچین! ✨';
+    if (percent === 100) return 'تکمیل ۱۰۰٪ برنامه‌ی امروز! قله را فتح کردی! 🏆';
+    if (percent >= 75) return 'فقط چند قدم تا تکمیل برنامه‌ی امروز باقی مانده! ⚡';
+    if (percent >= 40) return 'مسیر برنامه‌ی امروز هموار است؛ عالی پیش می‌روی! 🔥';
+    if (percent > 0) return 'شروعی پرقدرت؛ اولین ردیف‌های برنامه تیک خورد! 🚀';
+    return 'هر روز یک قدم جلوتر؛ برنامه‌ی امروزت را تکمیل کن! ✨';
   };
 
   return (
     <header className="w-full mb-5 flex flex-col gap-4">
       {/* Top action / control bar (No-Print) */}
       <div className="no-print flex flex-wrap items-center justify-between gap-3 bg-purple-950/40 border border-purple-500/25 rounded-2xl px-4 py-2.5 backdrop-blur-md shadow-sm">
-        {/* Left/Right widget: Personal Profile + Live Clock + Progress indicator */}
+        {/* Left/Right widget: Personal Profile + Live Clock + Animated Progress indicator */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Personalized User Badge */}
           <div className="flex items-center gap-1.5 bg-purple-900/50 border border-purple-400/35 px-3 py-1 rounded-full text-xs text-purple-100">
@@ -131,18 +135,28 @@ export const Header: React.FC<HeaderProps> = ({
             <span>{clockStr}</span>
           </div>
 
-          {/* Progress bar */}
-          <div className="flex items-center gap-2 bg-purple-900/40 border border-purple-400/30 px-3 py-1 rounded-full">
-            <Sparkles className="w-3.5 h-3.5 text-purple-300" />
-            <span className="text-xs font-medium text-purple-200">
-              تکمیل امروز: <strong className="text-white font-bold">{progressPercent}٪</strong>
+          {/* Lively, Animated Progress bar pill dedicated 100% to Today's Schedule (برنامه‌ی امروز) */}
+          <div
+            className="flex items-center gap-2.5 bg-gradient-to-r from-purple-900/80 via-indigo-900/80 to-purple-900/80 border border-purple-400/60 px-3.5 py-1.5 rounded-full shadow-[0_0_18px_rgba(168,85,247,0.45)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] transition-all duration-300 group cursor-default"
+            title={`وضعیت برنامه‌ی امروز: ${completedScheduleCount} از ${totalScheduleCount} ردیف انجام شده است`}
+          >
+            <Sparkles className="w-4 h-4 text-orange-400 animate-spin" style={{ animationDuration: '8s' }} />
+            <span className="text-xs font-semibold text-purple-100 flex items-center gap-1">
+              <span>تکمیل امروز:</span>
+              <strong className="text-white font-extrabold text-sm">{progressPercent}٪</strong>
             </span>
-            <div className="w-16 bg-purple-950/80 rounded-full h-1.5 overflow-hidden ml-1 border border-purple-500/30">
+            {/* Animated Moving Gradient Fill Bar */}
+            <div className="w-24 sm:w-28 bg-purple-950/90 rounded-full h-2.5 overflow-hidden ml-1 border border-purple-400/40 shadow-inner">
               <div
-                className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 h-full transition-all duration-500 ease-out"
+                className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 bg-[length:200%_100%] animate-gradient h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(249,115,22,0.8)]"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
+            {totalScheduleCount > 0 && (
+              <span className="text-[11px] font-bold text-purple-200/90 hidden md:inline-block bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-500/30">
+                {completedScheduleCount}/{totalScheduleCount} ردیف
+              </span>
+            )}
           </div>
 
           {/* Dynamic Daily Motivation Badge */}

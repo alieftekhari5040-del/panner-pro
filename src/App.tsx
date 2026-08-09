@@ -75,7 +75,6 @@ export default function App() {
     setData({
       ...loaded,
       dateStr: loaded.dateStr || expectedDate,
-      oneBigThing: loaded.oneBigThing || '',
     });
   }, [activeWeekday]);
 
@@ -84,25 +83,23 @@ export default function App() {
     saveDayData(data);
   }, [data]);
 
-  // Calculate Progress Percent: Priorities + Goals + Schedule (every checkbox counts 100%)
-  const totalItems = data.priorities.length + data.goals.length + data.schedule.length;
-  const completedItems =
-    data.priorities.filter((p) => p.completed).length +
-    data.goals.filter((g) => g.completed).length +
-    data.schedule.filter((s) => s.completed).length;
+  // Calculate Progress Percent: 100% Dedicated to Today's Schedule (برنامه‌ی امروز) as requested
+  const totalScheduleCount = data.schedule.length;
+  const completedScheduleCount = data.schedule.filter((s) => s.completed).length;
 
-  const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+  const progressPercent =
+    totalScheduleCount > 0 ? Math.round((completedScheduleCount / totalScheduleCount) * 100) : 0;
 
-  // Trigger Confetti when 100% complete (if at least 3 items completed)
+  // Trigger Confetti when 100% of Today's Schedule is completed (if at least 1 schedule row completed)
   useEffect(() => {
-    if (progressPercent === 100 && completedItems >= 3) {
+    if (progressPercent === 100 && completedScheduleCount >= 1) {
       confetti({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
       });
     }
-  }, [progressPercent, completedItems]);
+  }, [progressPercent, completedScheduleCount]);
 
   // Handler: Change Date String manually
   const handleDateChange = (newDate: string) => {
@@ -364,6 +361,8 @@ export default function App() {
         {/* Header & Controls */}
         <Header
           progressPercent={progressPercent}
+          completedScheduleCount={completedScheduleCount}
+          totalScheduleCount={totalScheduleCount}
           soundEnabled={soundEnabled}
           onToggleSound={() => setSoundEnabled(!soundEnabled)}
           onReset={handleReset}
