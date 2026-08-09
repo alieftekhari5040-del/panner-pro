@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
+import type { WeekdayName } from '../types';
 import { ALL_WEEKDAYS, getWeekIsoDates, toIsoDateString, addDaysToIso, formatShortJalaliDate, parseIsoDate } from '../utils/jalali';
 import { loadDayDataByIso } from '../utils/storage';
 import {
   BarChart3,
   Award,
-  TrendingUp,
-  Zap,
   CheckCircle2,
   Calendar,
   Flame,
   Target,
   Clock,
   Sparkles,
+  Filter,
 } from 'lucide-react';
 import type { HabitTrackItem } from './HabitTrackerView';
 
@@ -19,10 +19,13 @@ interface StatsProps {
   currentIsoDate?: string;
 }
 
+type FilterCategory = 'all' | 'schedule' | 'priorities' | 'goals';
+
 export const StatsAnalyticsView: React.FC<StatsProps> = ({
   currentIsoDate = toIsoDateString(),
 }) => {
   const [timeframe, setTimeframe] = useState<'week' | 'month'>('week');
+  const [categoryFilter, setCategoryFilter] = useState<FilterCategory>('all');
 
   // Calculate dates to inspect based on timeframe
   const datesToInspect = React.useMemo(() => {
@@ -48,7 +51,7 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
     }
   }, [currentIsoDate, timeframe]);
 
-  // Load stats for inspected dates — ONLY counting tasks that have actual text typed or are completed! (Fixes 137 phantom tasks bug)
+  // Load stats for inspected dates
   const dayStats = React.useMemo(() => {
     return datesToInspect.map((item) => {
       const data = loadDayDataByIso(item.iso);
@@ -65,8 +68,20 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
       const scheduleTotal = activeSchedule.length;
       const scheduleDone = activeSchedule.filter((s) => s.completed).length;
 
-      const total = prioritiesTotal + goalsTotal + scheduleTotal;
-      const completed = prioritiesDone + goalsDone + scheduleDone;
+      let total = prioritiesTotal + goalsTotal + scheduleTotal;
+      let completed = prioritiesDone + goalsDone + scheduleDone;
+
+      if (categoryFilter === 'schedule') {
+        total = scheduleTotal;
+        completed = scheduleDone;
+      } else if (categoryFilter === 'priorities') {
+        total = prioritiesTotal;
+        completed = prioritiesDone;
+      } else if (categoryFilter === 'goals') {
+        total = goalsTotal;
+        completed = goalsDone;
+      }
+
       const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
       return {
@@ -84,7 +99,7 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
         scheduleDone,
       };
     });
-  }, [datesToInspect]);
+  }, [datesToInspect, categoryFilter]);
 
   // Load habits from storage
   const [habits] = useState<HabitTrackItem[]>(() => {
@@ -244,9 +259,9 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
         </div>
       </div>
 
-      {/* Interactive Bar Chart for Current Week OR 30-Day Heatmap */}
+      {/* Interactive Bar Chart / Heatmap with Category Filter Switcher */}
       <div className="neon-box p-6 flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <span>{timeframe === 'week' ? 'نمودار راندمان ۷ روز هفته' : 'نقشه حرارتی ۳۰ روز گذشته (Heatmap)'}</span>
@@ -260,8 +275,53 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
                 : 'بررسی پیوستگی و میزان فعالیت شما در ۳۰ روز اخیر'}
             </p>
           </div>
-          <div className="text-xs text-purple-200 bg-purple-950/60 px-3 py-1.5 rounded-xl border border-purple-500/30">
-            روز انتخاب‌شده: <strong className="text-white font-bold">{selectedDayData.day} ({selectedDayData.percent}٪)</strong>
+
+          {/* Interactive Category Filter Pills */}
+          <div className="flex flex-wrap items-center gap-1.5 bg-purple-950/70 p-1.5 rounded-xl border border-purple-500/30">
+            <span className="text-xs text-purple-300 px-2 flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5 text-purple-400" />
+              <span>فیلتر:</span>
+            </span>
+            <button
+              onClick={() => setCategoryFilter('all')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                categoryFilter === 'all'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-purple-300 hover:text-white hover:bg-purple-900/40'
+              }`}
+            >
+              همه بخش‌ها
+            </button>
+            <button
+              onClick={() => setCategoryFilter('schedule')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                categoryFilter === 'schedule'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-purple-300 hover:text-white hover:bg-purple-900/40'
+              }`}
+            >
+              برنامه‌ی امروز
+            </button>
+            <button
+              onClick={() => setCategoryFilter('priorities')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                categoryFilter === 'priorities'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-purple-300 hover:text-white hover:bg-purple-900/40'
+              }`}
+            >
+              اولویت‌ها
+            </button>
+            <button
+              onClick={() => setCategoryFilter('goals')}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                categoryFilter === 'goals'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-purple-300 hover:text-white hover:bg-purple-900/40'
+              }`}
+            >
+              اهداف امروز
+            </button>
           </div>
         </div>
 
@@ -349,7 +409,7 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
                 جزئیات عملکرد روز {selectedDayData.day} ({selectedDayData.label})
               </h4>
               <p className="text-xs text-purple-300/90 mt-0.5">
-                مجموع کارهای مفید انجام‌شده در این تاریخ: <strong>{selectedDayData.completed} از {selectedDayData.total} مورد</strong>
+                مجموع کارهای مفید انجام‌شده در این تاریخ: <strong>{selectedDayData.completed} از {selectedDayData.total} مورد ({selectedDayData.percent}٪)</strong>
               </p>
             </div>
           </div>
@@ -368,7 +428,7 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
         </div>
       </div>
 
-      {/* 2-Column Grid: Category Performance Breakdown & Habit Summary */}
+      {/* 2-Column Grid: Category Performance Breakdown & Habit Summary with 7-Day Visual Dots */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         {/* Card 1: Category Breakdown */}
         <div className="neon-box p-6 flex flex-col gap-5 justify-between">
@@ -453,15 +513,15 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
           </div>
         </div>
 
-        {/* Card 2: Habit Success Summary */}
+        {/* Card 2: Habit Success Summary with 7-Day Dot Pattern */}
         <div className="neon-box p-6 flex flex-col gap-4 justify-between">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-400" />
-              <span>وضعیت پایبندی به عادت‌های روزانه</span>
+              <span>وضعیت پایبندی به عادت‌ها و الگوی هفتگی</span>
             </h3>
             <p className="text-xs text-purple-300/80 mt-1">
-              خلاصه استریک و پیشرفت عادت‌های موفقیت شما در طول هفته
+              مشاهده الگوی انجام عادت‌ها در ۷ روز هفته (شنبه تا جمعه)
             </p>
           </div>
 
@@ -472,18 +532,39 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
               return (
                 <div
                   key={h.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-purple-950/30 border border-purple-500/20"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-purple-950/40 border border-purple-500/20"
                 >
                   <span className="text-xs sm:text-sm font-semibold text-purple-100">
                     {h.name}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded-md border border-purple-400/20">
-                      {doneDays}/7 روز
-                    </span>
-                    <span className="text-xs font-extrabold text-orange-300">
-                      {rate}٪
-                    </span>
+
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    {/* 7-Day Visual Dot Matrix (Saturday -> Friday) */}
+                    <div className="flex items-center gap-1" title="وضعیت ۷ روز هفته (شنبه تا جمعه)">
+                      {ALL_WEEKDAYS.map((day) => {
+                        const done = h.days[day];
+                        return (
+                          <div
+                            key={day}
+                            className={`w-3 h-3 rounded-full border ${
+                              done
+                                ? 'bg-orange-400 border-orange-300 shadow-[0_0_6px_rgba(249,115,22,0.8)]'
+                                : 'bg-purple-950/80 border-purple-500/40'
+                            }`}
+                            title={`${day}: ${done ? 'انجام شد' : 'انجام نشد'}`}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-purple-300 bg-purple-900/50 px-2 py-0.5 rounded-md border border-purple-400/20">
+                        {doneDays}/7
+                      </span>
+                      <span className="text-xs font-extrabold text-orange-300 w-9 text-left">
+                        {rate}٪
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
@@ -494,24 +575,6 @@ export const StatsAnalyticsView: React.FC<StatsProps> = ({
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Smart Insights Summary Coach */}
-      <div className="neon-box p-6 flex flex-col sm:flex-row items-center gap-5 border-purple-400/60 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600/30 to-orange-500/30 border border-purple-400 flex items-center justify-center shrink-0 shadow-lg">
-          <Zap className="w-7 h-7 text-orange-300" />
-        </div>
-        <div className="flex-1">
-          <h4 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <span>تحلیل هوشمند عملکرد و پیشنهاد مشاور (Smart Coach)</span>
-            <span className="text-xs font-bold text-purple-300 bg-purple-900/60 px-2.5 py-0.5 rounded-full border border-purple-500/30">
-              هوایی
-            </span>
-          </h4>
-          <p className="text-sm text-purple-200 mt-1.5 leading-relaxed">
-            شما تا این لحظه در بازه انتخابی <strong>{totalTasksCompleted} فعالیت مفید</strong> را با موفقیت انجام داده‌اید. راندمان شما در روز <strong>{bestDayObj.day}</strong> با <strong>{bestDayObj.percent}٪</strong> در بالاترین سطح بوده است. نرخ پایبندی <strong>{habitRate}٪</strong> به عادت‌ها نشان‌دهنده‌ی نظم عالی شماست. پیشنهاد می‌شود برای حفظ مسیر صعود، وظایف اولویت‌دار روزهای پایانی هفته را از شب قبل مشخص کنید! 🚀
-          </p>
         </div>
       </div>
     </div>
