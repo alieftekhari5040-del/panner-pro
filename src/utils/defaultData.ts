@@ -1,10 +1,11 @@
 import type { DayPlannerData, WeekdayName } from '../types';
-import { getTodayJalaliString, getTodayWeekdayName } from './jalali';
+import { getJalaliStringForWeekday, getTodayWeekdayName } from './jalali';
 
 export function getDefaultPlannerData(weekday?: WeekdayName): DayPlannerData {
+  const targetDay = weekday || getTodayWeekdayName();
   return {
-    dateStr: getTodayJalaliString(),
-    activeWeekday: weekday || getTodayWeekdayName(),
+    dateStr: getJalaliStringForWeekday(targetDay),
+    activeWeekday: targetDay,
     priorities: [
       { id: 'p1', text: '', completed: false },
       { id: 'p2', text: '', completed: false },
@@ -13,10 +14,10 @@ export function getDefaultPlannerData(weekday?: WeekdayName): DayPlannerData {
       { id: 'p5', text: '', completed: false },
     ],
     goals: [
-      { id: 'g1', text: '' },
-      { id: 'g2', text: '' },
-      { id: 'g3', text: '' },
-      { id: 'g4', text: '' },
+      { id: 'g1', text: '', completed: false },
+      { id: 'g2', text: '', completed: false },
+      { id: 'g3', text: '', completed: false },
+      { id: 'g4', text: '', completed: false },
     ],
     habits: [
       { id: 'h1', text: 'مطالعه', icon: 'book', completed: false },

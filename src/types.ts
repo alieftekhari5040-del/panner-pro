@@ -16,6 +16,7 @@ export interface PriorityTask {
 export interface GoalItem {
   id: string;
   text: string;
+  completed?: boolean;
 }
 
 export interface DailyHabit {
@@ -33,7 +34,7 @@ export interface ScheduleSlot {
 }
 
 export interface DayPlannerData {
-  dateStr: string; // Jalali or custom formatted date e.g. "۱۸ مرداد ۱۴۰۵"
+  dateStr: string; // Jalali formatted date e.g. "۱۸ مرداد ۱۴۰۵"
   activeWeekday: WeekdayName;
   priorities: PriorityTask[];
   goals: GoalItem[];

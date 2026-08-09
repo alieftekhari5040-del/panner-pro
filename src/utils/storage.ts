@@ -1,19 +1,20 @@
 import type { DayPlannerData, WeekdayName } from '../types';
 import { getDefaultPlannerData } from './defaultData';
+import { getJalaliStringForWeekday } from './jalali';
 
-const STORAGE_PREFIX = 'ascent_blueprint_day_v1_';
+const STORAGE_PREFIX = 'ascent_blueprint_day_v2_';
 
 export function loadDayData(weekday: WeekdayName): DayPlannerData {
   try {
     const raw = localStorage.getItem(STORAGE_PREFIX + weekday);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Merge with default to ensure no missing fields
       const def = getDefaultPlannerData(weekday);
       return {
         ...def,
         ...parsed,
         activeWeekday: weekday,
+        dateStr: parsed.dateStr || getJalaliStringForWeekday(weekday),
       };
     }
   } catch {

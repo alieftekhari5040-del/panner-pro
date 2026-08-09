@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import html2canvas from 'html2canvas';
 import type { DayPlannerData, WeekdayName } from './types';
 import { loadDayData, saveDayData, resetDayData } from './utils/storage';
-import { getTodayWeekdayName } from './utils/jalali';
+import { getTodayWeekdayName, getJalaliStringForWeekday, getNextWeekdayName } from './utils/jalali';
 import { playCheckSound } from './utils/sound';
 import { Header } from './components/Header';
 import { DateWeekBar } from './components/DateWeekBar';
@@ -33,10 +33,14 @@ export default function App() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  // When activeWeekday changes, load data from storage
+  // When activeWeekday changes, load data from storage and ensure date matches that weekday
   useEffect(() => {
     const loaded = loadDayData(activeWeekday);
-    setData(loaded);
+    const expectedDate = getJalaliStringForWeekday(activeWeekday);
+    setData({
+      ...loaded,
+      dateStr: loaded.dateStr || expectedDate,
+    });
   }, [activeWeekday]);
 
   // Auto-save data on every change
@@ -44,14 +48,12 @@ export default function App() {
     saveDayData(data);
   }, [data]);
 
-  // Calculate Progress Percent
-  const totalItems =
-    data.priorities.length +
-    data.schedule.filter((s) => s.task.trim().length > 0).length;
-
+  // Calculate Progress Percent: Priorities + Goals + Schedule (every checkbox counts 100%)
+  const totalItems = data.priorities.length + data.goals.length + data.schedule.length;
   const completedItems =
     data.priorities.filter((p) => p.completed).length +
-    data.schedule.filter((s) => s.task.trim().length > 0 && s.completed).length;
+    data.goals.filter((g) => g.completed).length +
+    data.schedule.filter((s) => s.completed).length;
 
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
@@ -66,7 +68,7 @@ export default function App() {
     }
   }, [progressPercent, completedItems]);
 
-  // Handler: Change Date String
+  // Handler: Change Date String manually
   const handleDateChange = (newDate: string) => {
     setData((prev) => ({ ...prev, dateStr: newDate }));
   };
@@ -75,6 +77,24 @@ export default function App() {
   const handleSelectWeekday = (day: WeekdayName) => {
     playCheckSound(soundEnabled);
     setActiveWeekday(day);
+  };
+
+  // Handler: Prev Day
+  const handlePrevDay = () => {
+    const prevDay = getNextWeekdayName(activeWeekday, -1);
+    handleSelectWeekday(prevDay);
+  };
+
+  // Handler: Next Day
+  const handleNextDay = () => {
+    const nextDay = getNextWeekdayName(activeWeekday, 1);
+    handleSelectWeekday(nextDay);
+  };
+
+  // Handler: Today
+  const handleToday = () => {
+    const todayDay = getTodayWeekdayName();
+    handleSelectWeekday(todayDay);
   };
 
   // Handler: Toggle Priority Checkbox
@@ -121,6 +141,17 @@ export default function App() {
     }));
   };
 
+  // Handler: Toggle Goal Checkbox
+  const handleToggleGoal = (id: string) => {
+    playCheckSound(soundEnabled);
+    setData((prev) => ({
+      ...prev,
+      goals: prev.goals.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item
+      ),
+    }));
+  };
+
   // Handler: Change Goal Text
   const handleChangeGoalText = (id: string, text: string) => {
     setData((prev) => ({
@@ -140,6 +171,7 @@ export default function App() {
         {
           id: `g_${Date.now()}`,
           text: '',
+          completed: false,
         },
       ],
     }));
@@ -299,12 +331,15 @@ export default function App() {
           isInstallReady={!!deferredPrompt}
         />
 
-        {/* Date & Weekday Bar */}
+        {/* Date & Weekday Bar with Navigation */}
         <DateWeekBar
           dateStr={data.dateStr}
           onDateChange={handleDateChange}
           activeWeekday={activeWeekday}
           onSelectWeekday={handleSelectWeekday}
+          onPrevDay={handlePrevDay}
+          onNextDay={handleNextDay}
+          onToday={handleToday}
         />
 
         {/* Main Content Area: Full-width ScheduleCard, then Priorities & Goals side-by-side below it */}
@@ -329,6 +364,7 @@ export default function App() {
             />
             <GoalsCard
               goals={data.goals}
+              onToggleGoal={handleToggleGoal}
               onChangeText={handleChangeGoalText}
               onAddGoal={handleAddGoal}
               onRemoveGoal={handleRemoveGoal}
