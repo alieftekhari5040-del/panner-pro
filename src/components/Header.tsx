@@ -15,6 +15,7 @@ import {
   FileText,
   Edit2,
 } from 'lucide-react';
+import { playCheckSound } from '../utils/sound';
 
 interface HeaderProps {
   progressPercent: number;
@@ -96,6 +97,10 @@ export const Header: React.FC<HeaderProps> = ({
     if (percent >= 40) return 'مسیر برنامه‌ی امروز هموار است؛ عالی پیش می‌روی! 🔥';
     if (percent > 0) return 'شروعی پرقدرت؛ اولین ردیف‌های برنامه تیک خورد! 🚀';
     return 'هر روز یک قدم جلوتر؛ برنامه‌ی امروزت را تکمیل کن! ✨';
+  };
+
+  const handleLogoClick = () => {
+    playCheckSound(true);
   };
 
   return (
@@ -260,17 +265,23 @@ export const Header: React.FC<HeaderProps> = ({
           </p>
         </div>
 
-        {/* Left side (in RTL): THE ASCENT BLUEPRINT Logo & Icon */}
-        <div className="flex items-center gap-3 self-center sm:self-start">
-          <div className="flex flex-col text-left font-sans tracking-widest text-xs sm:text-sm font-semibold text-purple-200/90 leading-tight uppercase">
+        {/* Left side (in RTL): LIVELY ANIMATED THE ASCENT BLUEPRINT Logo & Equalizer Icon */}
+        <div
+          onClick={handleLogoClick}
+          className="flex items-center gap-3 self-center sm:self-start group cursor-pointer"
+          title="THE ASCENT BLUEPRINT — کلیک کنید"
+        >
+          {/* Shimmering Typography */}
+          <div className="flex flex-col text-left font-sans tracking-widest text-xs sm:text-sm font-black leading-tight uppercase bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
             <span>THE ASCENT</span>
             <span>BLUEPRINT</span>
           </div>
-          {/* Three rounded vertical bars logo icon (000) */}
-          <div className="flex items-center gap-1 bg-purple-500/15 p-2 rounded-xl border border-purple-500/35 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
-            <div className="w-2.5 h-6 bg-purple-300 rounded-full shadow-[0_0_8px_rgba(192,132,252,0.8)]" />
-            <div className="w-2.5 h-6 bg-purple-400 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-            <div className="w-2.5 h-6 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+
+          {/* Three rounded vertical bars logo icon (000) - LIVELY EQUALIZER WAVE */}
+          <div className="flex items-center gap-1.5 bg-purple-900/40 p-2.5 rounded-2xl border border-purple-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] group-hover:border-purple-300 group-hover:shadow-[0_0_30px_rgba(192,132,252,0.8)] transition-all duration-300">
+            <div className="w-2.5 h-6 bg-gradient-to-t from-purple-600 via-pink-400 to-purple-200 rounded-full shadow-[0_0_12px_rgba(192,132,252,0.9)] animate-bar-1" />
+            <div className="w-2.5 h-6 bg-gradient-to-t from-indigo-500 via-purple-400 to-pink-300 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.9)] animate-bar-2" />
+            <div className="w-2.5 h-6 bg-gradient-to-t from-purple-600 via-pink-400 to-purple-200 rounded-full shadow-[0_0_12px_rgba(139,92,246,0.9)] animate-bar-3" />
           </div>
         </div>
       </div>

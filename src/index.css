@@ -12,6 +12,56 @@
   }
 }
 
+/* Lively animated equalizer / energy bars for THE ASCENT BLUEPRINT logo */
+@keyframes bar-wave-1 {
+  0%, 100% {
+    transform: scaleY(0.75);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scaleY(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes bar-wave-2 {
+  0%, 100% {
+    transform: scaleY(1.15);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleY(0.65);
+    opacity: 0.75;
+  }
+}
+
+.animate-bar-1 {
+  animation: bar-wave-1 2s ease-in-out infinite;
+}
+
+.animate-bar-2 {
+  animation: bar-wave-2 2s ease-in-out infinite;
+}
+
+.animate-bar-3 {
+  animation: bar-wave-1 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-x 6s ease infinite;
+}
+
 /* Stable, cohesive dark glassmorphism (No movement/shaking) */
 .neon-box {
   background: rgba(18, 11, 42, 0.72);
@@ -84,5 +134,9 @@
   }
   .row-interactive:hover {
     background: transparent !important;
+  }
+  .animate-bar-1, .animate-bar-2, .animate-bar-3 {
+    animation: none !important;
+    transform: none !important;
   }
 }
