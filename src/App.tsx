@@ -9,7 +9,6 @@ import { Header } from './components/Header';
 import { DateWeekBar } from './components/DateWeekBar';
 import { PrioritiesCard } from './components/PrioritiesCard';
 import { GoalsCard } from './components/GoalsCard';
-import { HabitsCard } from './components/HabitsCard';
 import { ScheduleCard } from './components/ScheduleCard';
 import { LessonsCard } from './components/LessonsCard';
 import { FooterBar } from './components/FooterBar';
@@ -32,15 +31,13 @@ export default function App() {
     saveDayData(data);
   }, [data]);
 
-  // Calculate Progress Percent
+  // Calculate Progress Percent (excluding removed habits)
   const totalItems =
     data.priorities.length +
-    data.habits.length +
     data.schedule.filter((s) => s.task.trim().length > 0).length;
 
   const completedItems =
     data.priorities.filter((p) => p.completed).length +
-    data.habits.filter((h) => h.completed).length +
     data.schedule.filter((s) => s.task.trim().length > 0 && s.completed).length;
 
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
@@ -319,27 +316,19 @@ export default function App() {
           onSelectWeekday={handleSelectWeekday}
         />
 
-        {/* Two-column Main Content Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-          {/* Right Column in RTL (Habits) - 5/12 width on lg */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            <HabitsCard
-              habits={data.habits}
-              onToggle={handleToggleHabit}
-              onAddHabit={handleAddHabit}
-              onRemoveHabit={handleRemoveHabit}
-            />
-          </div>
+        {/* Main Content Area: Full-width ScheduleCard, then Priorities & Goals side-by-side below it */}
+        <div className="flex flex-col gap-6 mb-6">
+          {/* Top: Today's Schedule (برنامه‌ی امروز) */}
+          <ScheduleCard
+            schedule={data.schedule}
+            onChangeTask={handleChangeSlotTask}
+            onToggleSlot={handleToggleSlot}
+            onAddSlot={handleAddSlot}
+            onRemoveSlot={handleRemoveSlot}
+          />
 
-          {/* Left Column in RTL (Schedule -> below it: Priorities and Goals) - 7/12 width on lg */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
-            <ScheduleCard
-              schedule={data.schedule}
-              onChangeTask={handleChangeSlotTask}
-              onToggleSlot={handleToggleSlot}
-              onAddSlot={handleAddSlot}
-              onRemoveSlot={handleRemoveSlot}
-            />
+          {/* Below Today's Schedule: Priorities and Goals side by side on desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <PrioritiesCard
               priorities={data.priorities}
               onToggle={handleTogglePriority}
