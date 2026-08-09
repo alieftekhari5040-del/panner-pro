@@ -12,13 +12,26 @@ import { GoalsCard } from './components/GoalsCard';
 import { ScheduleCard } from './components/ScheduleCard';
 import { LessonsCard } from './components/LessonsCard';
 import { FooterBar } from './components/FooterBar';
+import { InstallModal } from './components/InstallModal';
 
 export default function App() {
   const [activeWeekday, setActiveWeekday] = useState<WeekdayName>(() => getTodayWeekdayName());
   const [data, setData] = useState<DayPlannerData>(() => loadDayData(activeWeekday));
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
+
+  // Listen for PWA desktop install prompt
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
 
   // When activeWeekday changes, load data from storage
   useEffect(() => {
@@ -139,41 +152,6 @@ export default function App() {
     }));
   };
 
-  // Handler: Toggle Habit Checkbox
-  const handleToggleHabit = (id: string) => {
-    playCheckSound(soundEnabled);
-    setData((prev) => ({
-      ...prev,
-      habits: prev.habits.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      ),
-    }));
-  };
-
-  // Handler: Add Custom Habit
-  const handleAddHabit = (text: string) => {
-    setData((prev) => ({
-      ...prev,
-      habits: [
-        ...prev.habits,
-        {
-          id: `custom_${Date.now()}`,
-          text,
-          icon: 'custom',
-          completed: false,
-        },
-      ],
-    }));
-  };
-
-  // Handler: Remove Custom Habit
-  const handleRemoveHabit = (id: string) => {
-    setData((prev) => ({
-      ...prev,
-      habits: prev.habits.filter((item) => item.id !== id),
-    }));
-  };
-
   // Handler: Toggle Schedule Slot
   const handleToggleSlot = (id: string) => {
     playCheckSound(soundEnabled);
@@ -284,6 +262,17 @@ export default function App() {
     window.print();
   };
 
+  // Handler: Trigger Native Desktop Install
+  const handleTriggerNativeInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    if (choice && choice.outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setIsInstallModalOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-center p-3 sm:p-6 md:p-8">
       {/* Background Cyber Glow & Ambient Gradients */}
@@ -293,7 +282,7 @@ export default function App() {
         <div className="absolute top-[40%] left-[50%] -translate-x-1/2 w-[600px] h-[300px] bg-purple-600/10 rounded-full blur-[180px]" />
       </div>
 
-      {/* Main Printable Planner Board Container (Maximum similarity to Vitto Season Planner poster) */}
+      {/* Main Printable Planner Board Container */}
       <div
         ref={boardRef}
         className="w-full max-w-[1180px] bg-[#0c081e]/80 border-2 border-purple-500/50 rounded-3xl p-4 sm:p-7 md:p-9 shadow-[0_0_50px_rgba(139,92,246,0.25)] backdrop-blur-xl relative transition-all"
@@ -306,6 +295,8 @@ export default function App() {
           onReset={handleReset}
           onExportPng={handleExportPng}
           onPrint={handlePrint}
+          onOpenInstallModal={() => setIsInstallModalOpen(true)}
+          isInstallReady={!!deferredPrompt}
         />
 
         {/* Date & Weekday Bar */}
@@ -356,6 +347,14 @@ export default function App() {
         {/* Poster Footer Bar */}
         <FooterBar />
       </div>
+
+      {/* Install on Desktop PWA Modal */}
+      <InstallModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+        onTriggerNativeInstall={handleTriggerNativeInstall}
+        isNativePromptReady={!!deferredPrompt}
+      />
 
       {/* Export loading badge */}
       {isExporting && (

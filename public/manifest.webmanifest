@@ -1,0 +1,42 @@
+{
+  "name": "برنامه‌ی روزانه — THE ASCENT BLUEPRINT",
+  "short_name": "برنامه روزانه",
+  "description": "برنامه‌ی روزانه — هر روز یک قدم جلوتر (THE ASCENT BLUEPRINT - DAILY)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070514",
+  "theme_color": "#8b5cf6",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

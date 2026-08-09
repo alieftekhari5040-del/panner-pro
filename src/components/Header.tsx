@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Printer, RotateCcw, Volume2, VolumeX, Sparkles } from 'lucide-react';
+import { Download, Printer, RotateCcw, Volume2, VolumeX, Sparkles, Monitor } from 'lucide-react';
 
 interface HeaderProps {
   progressPercent: number;
@@ -8,6 +8,8 @@ interface HeaderProps {
   onReset: () => void;
   onExportPng: () => void;
   onPrint: () => void;
+  onOpenInstallModal: () => void;
+  isInstallReady?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -17,6 +19,8 @@ export const Header: React.FC<HeaderProps> = ({
   onReset,
   onExportPng,
   onPrint,
+  onOpenInstallModal,
+  isInstallReady,
 }) => {
   return (
     <header className="w-full mb-6 flex flex-col gap-4">
@@ -37,7 +41,21 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Install on Desktop button */}
+          <button
+            onClick={onOpenInstallModal}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm border ${
+              isInstallReady
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.8)]'
+                : 'bg-purple-900/50 hover:bg-purple-800/70 border-purple-400/40 text-purple-100'
+            }`}
+            title="نصب اپلیکیشن روی دسکتاپ (Windows / Mac / Linux)"
+          >
+            <Monitor className="w-3.5 h-3.5" />
+            <span>نصب روی دسکتاپ</span>
+          </button>
+
           <button
             onClick={onExportPng}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/40 text-xs font-medium text-purple-100 transition-all shadow-sm"
