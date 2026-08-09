@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, Printer, RotateCcw, Volume2, VolumeX, Sparkles, Monitor, Zap } from 'lucide-react';
+import { Download, Printer, RotateCcw, Volume2, VolumeX, Sparkles, Monitor, Zap, HardDrive } from 'lucide-react';
 
 interface HeaderProps {
   progressPercent: number;
@@ -9,6 +9,7 @@ interface HeaderProps {
   onExportPng: () => void;
   onPrint: () => void;
   onOpenInstallModal: () => void;
+  onOpenStorageModal: () => void;
   isInstallReady?: boolean;
 }
 
@@ -20,6 +21,7 @@ export const Header: React.FC<HeaderProps> = ({
   onExportPng,
   onPrint,
   onOpenInstallModal,
+  onOpenStorageModal,
   isInstallReady,
 }) => {
   // Dynamic daily motivation based on completion percent
@@ -32,12 +34,12 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="w-full mb-6 flex flex-col gap-5">
+    <header className="w-full mb-5 flex flex-col gap-4">
       {/* Top action / control bar (No-Print) */}
-      <div className="no-print flex flex-wrap items-center justify-between gap-3 bg-purple-950/40 border border-purple-500/25 rounded-2xl px-4 py-3 backdrop-blur-md shadow-sm">
+      <div className="no-print flex flex-wrap items-center justify-between gap-3 bg-purple-950/40 border border-purple-500/25 rounded-2xl px-4 py-2.5 backdrop-blur-md shadow-sm">
         {/* Left/Right widget: Progress indicator + Live motivational banner */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2.5 bg-purple-900/40 border border-purple-400/30 px-3.5 py-1.5 rounded-full">
+          <div className="flex items-center gap-2.5 bg-purple-900/40 border border-purple-400/30 px-3 py-1.5 rounded-full">
             <Sparkles className="w-4 h-4 text-purple-300" />
             <span className="text-xs font-medium text-purple-200">
               تکمیل امروز: <strong className="text-white font-bold">{progressPercent}٪</strong>
@@ -51,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Dynamic Daily Motivation Badge */}
-          <div className="hidden md:flex items-center gap-1.5 text-xs font-medium text-purple-200/90 bg-purple-900/30 px-3.5 py-1.5 rounded-full border border-purple-500/20">
+          <div className="hidden lg:flex items-center gap-1.5 text-xs font-medium text-purple-200/90 bg-purple-900/30 px-3.5 py-1.5 rounded-full border border-purple-500/20">
             <Zap className="w-3.5 h-3.5 text-orange-400" />
             <span>{getMotivationalQuote(progressPercent)}</span>
           </div>
@@ -59,10 +61,20 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Persistent Storage Status & Backup button */}
+          <button
+            onClick={onOpenStorageModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            title="وضعیت ذخیره‌سازی در مرورگر و تهیه‌ی فایل پشتیبان (Backup / Restore)"
+          >
+            <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
+            <span>ذخیره در مرورگر</span>
+          </button>
+
           {/* Install on Desktop button */}
           <button
             onClick={onOpenInstallModal}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors border shadow-sm ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors border shadow-sm ${
               isInstallReady
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-purple-300'
                 : 'bg-purple-900/50 hover:bg-purple-800/70 border-purple-400/30 text-purple-100'
@@ -75,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onExportPng}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
             title="دانلود به عنوان عکس پوستر (PNG)"
           >
             <Download className="w-3.5 h-3.5" />
@@ -84,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onPrint}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-xs font-medium text-purple-200 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-xs font-medium text-purple-200 transition-colors"
             title="چاپ یا ذخیره به عنوان PDF"
           >
             <Printer className="w-3.5 h-3.5" />

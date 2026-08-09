@@ -20,7 +20,7 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
   const completedCount = goals.filter((g) => g.completed).length;
 
   return (
-    <div className="neon-box p-5 sm:p-6 flex flex-col gap-4">
+    <div className="neon-box p-5 sm:p-6 flex flex-col gap-4 h-full">
       {/* Card Title & Add Goal button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -44,8 +44,8 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
         </button>
       </div>
 
-      {/* Inner container (No numbering as requested) */}
-      <div className="neon-inner-box p-4 sm:p-5 flex flex-col gap-3">
+      {/* List of goal rows aligned 100% with PrioritiesCard */}
+      <div className="flex flex-col gap-3 mt-1">
         {goals.map((goal) => (
           <div key={goal.id} className="row-interactive flex items-center gap-3 p-2.5 rounded-xl group">
             {/* Square Checkbox on right (RTL) */}
@@ -61,18 +61,23 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
               {goal.completed && <Check className="w-4 h-4 stroke-[3]" />}
             </button>
 
-            {/* Goal Text Input (No .1, .2 numbers) */}
-            <input
-              type="text"
-              value={goal.text}
-              onChange={(e) => onChangeText(goal.id, e.target.value)}
-              placeholder="هدف خود برای امروز را بنویسید..."
-              className={`w-full bg-transparent pb-1 px-1 text-sm sm:text-base border-b border-purple-500/30 focus:border-purple-300 outline-none transition-colors ${
-                goal.completed
-                  ? 'text-purple-300/60 line-through'
-                  : 'text-purple-100 placeholder-purple-400/40'
-              }`}
-            />
+            {/* Spacer matching the numbering offset in PrioritiesCard so text inputs align 100% */}
+            <span className="w-5 shrink-0 select-none" />
+
+            {/* Goal Text Input */}
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={goal.text}
+                onChange={(e) => onChangeText(goal.id, e.target.value)}
+                placeholder="هدف خود برای امروز را بنویسید..."
+                className={`w-full bg-transparent pb-1 px-1 text-sm sm:text-base border-b border-purple-500/40 focus:border-purple-300 outline-none transition-colors ${
+                  goal.completed
+                    ? 'text-purple-300/60 line-through'
+                    : 'text-purple-100 placeholder-purple-400/40'
+                }`}
+              />
+            </div>
 
             <button
               onClick={() => onRemoveGoal(goal.id)}
@@ -84,7 +89,7 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
           </div>
         ))}
         {goals.length === 0 && (
-          <div className="text-center py-3 text-purple-400/60 text-sm">
+          <div className="text-center py-4 text-purple-400/60 text-sm">
             هیچ هدفی ثبت نشده است. روی «هدف جدید» کلیک کنید.
           </div>
         )}

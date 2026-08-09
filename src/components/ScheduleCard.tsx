@@ -38,12 +38,12 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
         </button>
       </div>
 
-      {/* Table Container */}
+      {/* Table Container with Numbering as requested */}
       <div className="neon-inner-box overflow-hidden flex-1 flex flex-col divide-y divide-purple-500/25">
-        {schedule.map((slot) => (
+        {schedule.map((slot, idx) => (
           <div
             key={slot.id}
-            className={`group row-interactive flex items-center justify-between gap-3.5 p-3 sm:p-3.5 ${
+            className={`group row-interactive flex items-center justify-between gap-3 p-2.5 sm:p-3 ${
               slot.completed
                 ? 'bg-purple-950/50'
                 : ''
@@ -62,7 +62,12 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
               {slot.completed && <Check className="w-4 h-4 stroke-[3]" />}
             </button>
 
-            {/* 2. Wide activity / task input column */}
+            {/* 2. Numbering (.1, .2, .3...) as requested */}
+            <span className="text-xs sm:text-sm font-semibold text-purple-300/80 w-5 select-none shrink-0 text-center">
+              {idx + 1}.
+            </span>
+
+            {/* 3. Wide activity / task input column */}
             <div className="flex-1 flex items-center">
               <input
                 type="text"
@@ -77,7 +82,7 @@ export const ScheduleCard: React.FC<ScheduleCardProps> = ({
               />
             </div>
 
-            {/* 3. Delete button remains on LEFT side (in RTL, last element) on hover */}
+            {/* 4. Delete button remains on LEFT side (in RTL, last element) on hover */}
             <button
               onClick={() => onRemoveSlot(slot.id)}
               className="no-print opacity-0 group-hover:opacity-100 focus:opacity-100 text-purple-400/60 hover:text-red-400 p-1.5 transition-colors shrink-0"

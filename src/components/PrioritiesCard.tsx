@@ -20,7 +20,7 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
   const completedCount = priorities.filter((p) => p.completed).length;
 
   return (
-    <div className="neon-box p-5 sm:p-6 flex flex-col gap-4">
+    <div className="neon-box p-5 sm:p-6 flex flex-col gap-4 h-full">
       {/* Card Title & Add Task button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -44,7 +44,7 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
         </button>
       </div>
 
-      {/* List of priority rows with Numbering as requested */}
+      {/* List of priority rows aligned 100% with GoalsCard */}
       <div className="flex flex-col gap-3 mt-1">
         {priorities.map((task, idx) => (
           <div key={task.id} className="row-interactive flex items-center gap-3 p-2.5 rounded-xl group">
@@ -62,7 +62,7 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
             </button>
 
             {/* Numbering (.1, .2, ...) */}
-            <span className="text-xs sm:text-sm font-semibold text-purple-300/80 w-5 select-none shrink-0">
+            <span className="text-xs sm:text-sm font-semibold text-purple-300/80 w-5 select-none shrink-0 text-center">
               {idx + 1}.
             </span>
 

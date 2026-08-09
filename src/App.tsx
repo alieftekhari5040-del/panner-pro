@@ -14,6 +14,7 @@ import { ScheduleCard } from './components/ScheduleCard';
 import { LessonsCard } from './components/LessonsCard';
 import { FooterBar } from './components/FooterBar';
 import { InstallModal } from './components/InstallModal';
+import { StorageModal } from './components/StorageModal';
 import { HabitTrackerView } from './components/HabitTrackerView';
 import { StatsAnalyticsView } from './components/StatsAnalyticsView';
 
@@ -25,6 +26,7 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
+  const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
 
   // Listen for PWA desktop install prompt
@@ -309,8 +311,14 @@ export default function App() {
     }
   };
 
+  // Handler: Reload when data restored from import
+  const handleDataRestored = () => {
+    const loaded = loadDayData(activeWeekday);
+    setData(loaded);
+  };
+
   return (
-    <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-center p-3 sm:p-6 md:p-8">
+    <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-start sm:justify-center p-3 sm:p-5 md:p-6">
       {/* Calm, Static Ambient Background Glow */}
       <div className="fixed inset-0 pointer-events-none -z-10 bg-[#070514] overflow-hidden">
         <div className="absolute top-[-10%] right-[15%] w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[150px]" />
@@ -321,7 +329,7 @@ export default function App() {
       {/* Main Printable Planner Board Container: STABLE, SOLID, NO MOVEMENT/SHAKING */}
       <div
         ref={boardRef}
-        className="w-full max-w-[1180px] bg-[#0c081e]/90 border-2 border-purple-500/50 rounded-3xl p-4 sm:p-7 md:p-9 shadow-[0_0_50px_rgba(139,92,246,0.25)] backdrop-blur-2xl relative"
+        className="w-full max-w-[1140px] bg-[#0c081e]/90 border-2 border-purple-500/50 rounded-3xl p-4 sm:p-6 md:p-8 shadow-[0_0_50px_rgba(139,92,246,0.25)] backdrop-blur-2xl relative my-auto"
       >
         {/* Header & Controls */}
         <Header
@@ -332,6 +340,7 @@ export default function App() {
           onExportPng={handleExportPng}
           onPrint={handlePrint}
           onOpenInstallModal={() => setIsInstallModalOpen(true)}
+          onOpenStorageModal={() => setIsStorageModalOpen(true)}
           isInstallReady={!!deferredPrompt}
         />
 
@@ -340,7 +349,7 @@ export default function App() {
 
         {/* Tab 1: Today's Planner (برنامه‌ی روزانه) */}
         {activeTab === 'today' && (
-          <div className="flex flex-col gap-6 animate-in fade-in">
+          <div className="flex flex-col gap-5 animate-in fade-in">
             {/* Date & Weekday Bar with Navigation */}
             <DateWeekBar
               dateStr={data.dateStr}
@@ -353,7 +362,7 @@ export default function App() {
             />
 
             {/* Main Content Area: Full-width ScheduleCard, then Priorities & Goals side-by-side below it */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5">
               {/* Top: Today's Schedule (برنامه‌ی امروز) */}
               <ScheduleCard
                 schedule={data.schedule}
@@ -364,7 +373,7 @@ export default function App() {
               />
 
               {/* Below Today's Schedule: Priorities and Goals side by side on desktop */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
                 <PrioritiesCard
                   priorities={data.priorities}
                   onToggle={handleTogglePriority}
@@ -408,6 +417,13 @@ export default function App() {
         onClose={() => setIsInstallModalOpen(false)}
         onTriggerNativeInstall={handleTriggerNativeInstall}
         isNativePromptReady={!!deferredPrompt}
+      />
+
+      {/* Persistent Storage Backup/Restore Modal */}
+      <StorageModal
+        isOpen={isStorageModalOpen}
+        onClose={() => setIsStorageModalOpen(false)}
+        onDataRestored={handleDataRestored}
       />
 
       {/* Export loading badge */}
