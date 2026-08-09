@@ -99,8 +99,8 @@ export const Header: React.FC<HeaderProps> = ({
       {/* UPGRADED Perfectly Organized Executive Command Bar (Single horizontal row, perfectly aligned left & right) */}
       <div className="no-print flex flex-wrap items-center justify-between gap-3 bg-[#110a2c]/85 border border-purple-500/40 rounded-2xl px-4 py-2.5 backdrop-blur-2xl shadow-[0_4px_30px_rgba(139,92,246,0.25)] w-full">
         
-        {/* RIGHT GROUP (in RTL): Personal Identity + UPGRADED LIVE CLOCK */}
-        <div className="flex items-center gap-2.5">
+        {/* RIGHT GROUP (in RTL): Personal Identity + LIVE CLOCK + LIVELY TODAY'S COMPLETION PROGRESS BAR ON RIGHT SIDE AS REQUESTED */}
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Personalized Profile Greeting Badge */}
           <div className="flex items-center gap-1.5 bg-purple-900/50 border border-purple-400/40 px-3 py-1.5 rounded-xl text-xs sm:text-sm text-purple-100 shadow-sm">
             {greeting.icon}
@@ -131,11 +131,8 @@ export const Header: React.FC<HeaderProps> = ({
             <ClockIcon className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
             <span>{clockStr}</span>
           </div>
-        </div>
 
-        {/* LEFT GROUP (in RTL): Lively Today Schedule Progress Bar + Minimalist Controls */}
-        <div className="flex items-center gap-2.5">
-          {/* Upgraded Lively Today Schedule Progress Bar */}
+          {/* Upgraded Lively Today Schedule Progress Bar on the RIGHT side */}
           <div
             className="flex items-center gap-2 bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-purple-900/90 border border-purple-400/60 px-3.5 py-1.5 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_22px_rgba(168,85,247,0.7)] transition-all duration-300 group cursor-default"
             title={`وضعیت برنامه‌ی امروز: ${completedScheduleCount} از ${totalScheduleCount} ردیف انجام شده است`}
@@ -158,36 +155,36 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             )}
           </div>
+        </div>
 
-          {/* Minimalist Utility Group (Shortcuts, Sound, Reset) */}
-          <div className="flex items-center gap-1 bg-purple-950/60 p-1 rounded-xl border border-purple-500/35">
-            {/* Shortcuts Help */}
-            <button
-              onClick={onOpenShortcutsModal}
-              className="p-1.5 rounded-lg hover:bg-purple-800/60 text-purple-200 hover:text-white transition-colors"
-              title="کلیدهای میانبر لپ‌تاپ (Shortcuts)"
-            >
-              <Keyboard className="w-4 h-4 text-purple-300" />
-            </button>
+        {/* LEFT GROUP (in RTL): Minimalist Utility Controls (Shortcuts, Sound, Reset) */}
+        <div className="flex items-center gap-1 bg-purple-950/60 p-1 rounded-xl border border-purple-500/35 shrink-0">
+          {/* Shortcuts Help */}
+          <button
+            onClick={onOpenShortcutsModal}
+            className="p-1.5 rounded-lg hover:bg-purple-800/60 text-purple-200 hover:text-white transition-colors"
+            title="کلیدهای میانبر لپ‌تاپ (Shortcuts)"
+          >
+            <Keyboard className="w-4 h-4 text-purple-300" />
+          </button>
 
-            {/* Sound Toggle */}
-            <button
-              onClick={onToggleSound}
-              className="p-1.5 rounded-lg hover:bg-purple-800/60 text-purple-300 hover:text-white transition-colors"
-              title={soundEnabled ? 'صدا روشن' : 'صدا خاموش'}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-300" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
-            </button>
+          {/* Sound Toggle */}
+          <button
+            onClick={onToggleSound}
+            className="p-1.5 rounded-lg hover:bg-purple-800/60 text-purple-300 hover:text-white transition-colors"
+            title={soundEnabled ? 'صدا روشن' : 'صدا خاموش'}
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-300" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
+          </button>
 
-            {/* Reset Today */}
-            <button
-              onClick={onReset}
-              className="p-1.5 rounded-lg hover:bg-red-900/60 text-purple-300 hover:text-red-300 transition-colors"
-              title="بازنشانی برنامه‌ی امروز"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Reset Today */}
+          <button
+            onClick={onReset}
+            className="p-1.5 rounded-lg hover:bg-red-900/60 text-purple-300 hover:text-red-300 transition-colors"
+            title="بازنشانی برنامه‌ی امروز"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
         </div>
 
       </div>
