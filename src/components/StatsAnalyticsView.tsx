@@ -13,22 +13,28 @@ import {
   Target,
   Clock,
   Sparkles,
-  ChevronLeft,
 } from 'lucide-react';
 import type { HabitTrackItem } from './HabitTrackerView';
 
 export const StatsAnalyticsView: React.FC = () => {
-  // Load all 7 days of data
+  // Load all 7 days of data — ONLY counting tasks that have actual text typed or are completed! (Fixes 137 phantom tasks bug)
   const dayStats = ALL_WEEKDAYS.map((day) => {
     const data = loadDayData(day);
-    const prioritiesTotal = data.priorities.length;
-    const prioritiesDone = data.priorities.filter((p) => p.completed).length;
+    
+    // Count only non-empty or completed priorities
+    const activePriorities = data.priorities.filter((p) => p.text.trim().length > 0 || p.completed);
+    const prioritiesTotal = activePriorities.length;
+    const prioritiesDone = activePriorities.filter((p) => p.completed).length;
 
-    const goalsTotal = data.goals.length;
-    const goalsDone = data.goals.filter((g) => g.completed).length;
+    // Count only non-empty or completed goals
+    const activeGoals = data.goals.filter((g) => g.text.trim().length > 0 || g.completed);
+    const goalsTotal = activeGoals.length;
+    const goalsDone = activeGoals.filter((g) => g.completed).length;
 
-    const scheduleTotal = data.schedule.length;
-    const scheduleDone = data.schedule.filter((s) => s.completed).length;
+    // Count only non-empty or completed schedule rows
+    const activeSchedule = data.schedule.filter((s) => s.task.trim().length > 0 || s.completed);
+    const scheduleTotal = activeSchedule.length;
+    const scheduleDone = activeSchedule.filter((s) => s.completed).length;
 
     const total = prioritiesTotal + goalsTotal + scheduleTotal;
     const completed = prioritiesDone + goalsDone + scheduleDone;
@@ -67,7 +73,7 @@ export const StatsAnalyticsView: React.FC = () => {
   }, 0);
   const habitRate = totalHabitDays > 0 ? Math.round((completedHabitDays / totalHabitDays) * 100) : 0;
 
-  // Calculate overall category averages
+  // Calculate overall category averages across active items only
   const totalPrioritiesAll = dayStats.reduce((acc, d) => acc + d.prioritiesTotal, 0);
   const donePrioritiesAll = dayStats.reduce((acc, d) => acc + d.prioritiesDone, 0);
   const prioritiesAvg = totalPrioritiesAll > 0 ? Math.round((donePrioritiesAll / totalPrioritiesAll) * 100) : 0;
@@ -108,11 +114,11 @@ export const StatsAnalyticsView: React.FC = () => {
         </div>
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-purple-900/40 border border-purple-500/40 text-xs font-bold text-purple-200">
           <Sparkles className="w-4 h-4 text-purple-400" />
-          <span>وضعیت کل هفته: {weeklyAverage}٪ موفقیت</span>
+          <span>راندمان کل هفته: {weeklyAverage}٪ موفقیت</span>
         </div>
       </div>
 
-      {/* 4 Summary Stat Cards */}
+      {/* 4 Summary Stat Cards (Clean RTL Layout without awkward floating badges) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Weekly average */}
         <div className="neon-box p-5 flex items-center justify-between group hover:border-purple-400/60 transition-all">
@@ -125,12 +131,12 @@ export const StatsAnalyticsView: React.FC = () => {
               <p className="text-2xl font-black text-white mt-0.5">{weeklyAverage}٪</p>
             </div>
           </div>
-          <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-            مطلوب
+          <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-full shrink-0">
+            هفتگی
           </span>
         </div>
 
-        {/* Card 2: Total Completed */}
+        {/* Card 2: Total Completed (FIXED: ZERO PHANTOM 137 TASKS BUG) */}
         <div className="neon-box p-5 flex items-center justify-between group hover:border-indigo-400/60 transition-all">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-indigo-600/25 border border-indigo-400/40 flex items-center justify-center shrink-0">
@@ -138,11 +144,16 @@ export const StatsAnalyticsView: React.FC = () => {
             </div>
             <div>
               <p className="text-xs text-purple-300/90 font-medium">کارهای انجام‌شده</p>
-              <p className="text-2xl font-black text-white mt-0.5">{totalTasksCompleted} مورد</p>
+              <p className="text-xl sm:text-2xl font-black text-white mt-0.5 flex items-baseline gap-1.5">
+                <span>{totalTasksCompleted}</span>
+                <span className="text-xs sm:text-sm font-semibold text-purple-300">
+                  از {totalTasksAll} مورد
+                </span>
+              </p>
             </div>
           </div>
-          <span className="text-xs font-bold text-purple-300 bg-purple-900/50 border border-purple-400/30 px-2 py-0.5 rounded-full">
-            از {totalTasksAll}
+          <span className="text-xs font-bold text-purple-300 bg-purple-900/50 border border-purple-400/30 px-2.5 py-1 rounded-full shrink-0">
+            مفید
           </span>
         </div>
 
@@ -153,12 +164,14 @@ export const StatsAnalyticsView: React.FC = () => {
               <Award className="w-6 h-6 text-pink-300" />
             </div>
             <div>
-              <p className="text-xs text-purple-300/90 font-medium">بهترین روز هفته</p>
-              <p className="text-lg font-bold text-white mt-0.5">{bestDayObj.day}</p>
+              <p className="text-xs text-purple-300/90 font-medium">فعال‌ترین روز هفته</p>
+              <p className="text-base sm:text-lg font-bold text-white mt-0.5">
+                {bestDayObj.day} <span className="text-xs font-normal text-purple-300">({bestDayObj.completed} کار)</span>
+              </p>
             </div>
           </div>
-          <span className="text-xs font-bold text-orange-400 bg-orange-950/60 border border-orange-500/30 px-2 py-0.5 rounded-full">
-            {bestDayObj.completed} کار
+          <span className="text-xs font-bold text-orange-400 bg-orange-950/60 border border-orange-500/30 px-2.5 py-1 rounded-full shrink-0">
+            برتر
           </span>
         </div>
 
@@ -173,7 +186,7 @@ export const StatsAnalyticsView: React.FC = () => {
               <p className="text-2xl font-black text-white mt-0.5">{habitRate}٪</p>
             </div>
           </div>
-          <span className="text-xs font-bold text-orange-300 bg-orange-900/40 border border-orange-400/30 px-2 py-0.5 rounded-full">
+          <span className="text-xs font-bold text-orange-300 bg-orange-900/40 border border-orange-400/30 px-2.5 py-1 rounded-full shrink-0">
             استمراری
           </span>
         </div>
@@ -254,14 +267,14 @@ export const StatsAnalyticsView: React.FC = () => {
                 جزئیات عملکرد روز {selectedDay}
               </h4>
               <p className="text-xs text-purple-300/90 mt-0.5">
-                مجموع کارهای انجام‌شده در این روز: <strong>{selectedDayData.completed} از {selectedDayData.total} مورد</strong>
+                مجموع کارهای مفید انجام‌شده در این روز: <strong>{selectedDayData.completed} از {selectedDayData.total} مورد</strong>
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
             <div className="px-3 py-1.5 rounded-xl bg-purple-900/40 border border-purple-500/30 text-xs text-purple-200">
-              برنامه‌ی زمانی: <strong>{selectedDayData.scheduleDone}/{selectedDayData.scheduleTotal}</strong>
+              برنامه‌ی امروز: <strong>{selectedDayData.scheduleDone}/{selectedDayData.scheduleTotal}</strong>
             </div>
             <div className="px-3 py-1.5 rounded-xl bg-purple-900/40 border border-purple-500/30 text-xs text-purple-200">
               اولویت‌ها: <strong>{selectedDayData.prioritiesDone}/{selectedDayData.prioritiesTotal}</strong>
@@ -293,7 +306,7 @@ export const StatsAnalyticsView: React.FC = () => {
               <div className="flex items-center justify-between text-xs sm:text-sm font-semibold">
                 <span className="text-purple-200 flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-purple-400" />
-                  <span>برنامه‌ی زمانی (Schedule)</span>
+                  <span>برنامه‌ی امروز (Today Schedule)</span>
                 </span>
                 <span className="text-white font-bold">{scheduleAvg}٪</span>
               </div>
@@ -415,7 +428,7 @@ export const StatsAnalyticsView: React.FC = () => {
             </span>
           </h4>
           <p className="text-sm text-purple-200 mt-1.5 leading-relaxed">
-            شما تا این لحظه در طول هفته جاری <strong>{totalTasksCompleted} فعالیت</strong> را با موفقیت انجام داده‌اید. راندمان شما در روز <strong>{bestDayObj.day}</strong> با <strong>{bestDayObj.percent}٪</strong> در بالاترین سطح بوده است. نرخ پایبندی <strong>{habitRate}٪</strong> به عادت‌ها نشان‌دهنده‌ی نظم عالی شماست. پیشنهاد می‌شود برای حفظ مسیر صعود، وظایف اولویت‌دار روزهای پایانی هفته را از شب قبل مشخص کنید! 🚀
+            شما تا این لحظه در طول هفته جاری <strong>{totalTasksCompleted} فعالیت مفید</strong> را با موفقیت انجام داده‌اید. راندمان شما در روز <strong>{bestDayObj.day}</strong> با <strong>{bestDayObj.percent}٪</strong> در بالاترین سطح بوده است. نرخ پایبندی <strong>{habitRate}٪</strong> به عادت‌ها نشان‌دهنده‌ی نظم عالی شماست. پیشنهاد می‌شود برای حفظ مسیر صعود، وظایف اولویت‌دار روزهای پایانی هفته را از شب قبل مشخص کنید! 🚀
           </p>
         </div>
       </div>
