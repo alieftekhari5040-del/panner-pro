@@ -1,5 +1,20 @@
-import React from 'react';
-import { Download, Printer, RotateCcw, Volume2, VolumeX, Sparkles, Monitor, Zap, HardDrive } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Download,
+  Printer,
+  RotateCcw,
+  Volume2,
+  VolumeX,
+  Sparkles,
+  Monitor,
+  Zap,
+  HardDrive,
+  User,
+  Clock as ClockIcon,
+  Keyboard,
+  FileText,
+  Edit2,
+} from 'lucide-react';
 
 interface HeaderProps {
   progressPercent: number;
@@ -10,8 +25,12 @@ interface HeaderProps {
   onPrint: () => void;
   onOpenInstallModal: () => void;
   onOpenStorageModal: () => void;
+  onOpenShortcutsModal: () => void;
+  onOpenQuickNoteModal: () => void;
   isInstallReady?: boolean;
 }
+
+const PROFILE_NAME_KEY = 'ascent_blueprint_profile_name';
 
 export const Header: React.FC<HeaderProps> = ({
   progressPercent,
@@ -22,8 +41,50 @@ export const Header: React.FC<HeaderProps> = ({
   onPrint,
   onOpenInstallModal,
   onOpenStorageModal,
+  onOpenShortcutsModal,
+  onOpenQuickNoteModal,
   isInstallReady,
 }) => {
+  // Personalized Profile Name
+  const [profileName, setProfileName] = useState(() => {
+    try {
+      return localStorage.getItem(PROFILE_NAME_KEY) || 'علی افتخاری';
+    } catch {
+      return 'علی افتخاری';
+    }
+  });
+  const [isEditingName, setIsEditingName] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PROFILE_NAME_KEY, profileName);
+    } catch {
+      // ignore
+    }
+  }, [profileName]);
+
+  // Live Persian Digital Clock for laptop view
+  const [clockStr, setClockStr] = useState('');
+
+  useEffect(() => {
+    const updateClock = () => {
+      try {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('fa-IR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        setClockStr(formatter.format(now));
+      } catch {
+        setClockStr('۱۲:۰۰');
+      }
+    };
+    updateClock();
+    const timer = setInterval(updateClock, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Dynamic daily motivation based on completion percent
   const getMotivationalQuote = (percent: number) => {
     if (percent === 100) return 'تکمیل ۱۰۰٪! امروز قله را فتح کردی! 🏆';
@@ -37,14 +98,46 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="w-full mb-5 flex flex-col gap-4">
       {/* Top action / control bar (No-Print) */}
       <div className="no-print flex flex-wrap items-center justify-between gap-3 bg-purple-950/40 border border-purple-500/25 rounded-2xl px-4 py-2.5 backdrop-blur-md shadow-sm">
-        {/* Left/Right widget: Progress indicator + Live motivational banner */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2.5 bg-purple-900/40 border border-purple-400/30 px-3 py-1.5 rounded-full">
-            <Sparkles className="w-4 h-4 text-purple-300" />
+        {/* Left/Right widget: Personal Profile + Live Clock + Progress indicator */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Personalized User Badge */}
+          <div className="flex items-center gap-1.5 bg-purple-900/50 border border-purple-400/35 px-3 py-1 rounded-full text-xs text-purple-100">
+            <User className="w-3.5 h-3.5 text-purple-300 shrink-0" />
+            {isEditingName ? (
+              <input
+                type="text"
+                value={profileName}
+                onChange={(e) => setProfileName(e.target.value)}
+                onBlur={() => setIsEditingName(false)}
+                onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
+                className="bg-purple-950 px-1.5 py-0.5 rounded text-white outline-none w-28 text-xs font-bold"
+                autoFocus
+              />
+            ) : (
+              <button
+                onClick={() => setIsEditingName(true)}
+                className="flex items-center gap-1 hover:text-white font-bold transition-colors"
+                title="کلیک برای تغییر نام کاربری"
+              >
+                <span>سلام، {profileName}!</span>
+                <Edit2 className="w-2.5 h-2.5 text-purple-400 opacity-60 hover:opacity-100" />
+              </button>
+            )}
+          </div>
+
+          {/* Live Laptop Digital Clock */}
+          <div className="hidden sm:flex items-center gap-1.5 bg-purple-950/60 border border-purple-500/30 px-3 py-1 rounded-full text-xs font-mono text-purple-200">
+            <ClockIcon className="w-3.5 h-3.5 text-orange-400" />
+            <span>{clockStr}</span>
+          </div>
+
+          {/* Progress bar */}
+          <div className="flex items-center gap-2 bg-purple-900/40 border border-purple-400/30 px-3 py-1 rounded-full">
+            <Sparkles className="w-3.5 h-3.5 text-purple-300" />
             <span className="text-xs font-medium text-purple-200">
               تکمیل امروز: <strong className="text-white font-bold">{progressPercent}٪</strong>
             </span>
-            <div className="w-20 bg-purple-950/80 rounded-full h-2 overflow-hidden ml-1 border border-purple-500/30">
+            <div className="w-16 bg-purple-950/80 rounded-full h-1.5 overflow-hidden ml-1 border border-purple-500/30">
               <div
                 className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 h-full transition-all duration-500 ease-out"
                 style={{ width: `${progressPercent}%` }}
@@ -53,22 +146,41 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Dynamic Daily Motivation Badge */}
-          <div className="hidden lg:flex items-center gap-1.5 text-xs font-medium text-purple-200/90 bg-purple-900/30 px-3.5 py-1.5 rounded-full border border-purple-500/20">
+          <div className="hidden xl:flex items-center gap-1.5 text-xs font-medium text-purple-200/90 bg-purple-900/30 px-3.5 py-1 rounded-full border border-purple-500/20">
             <Zap className="w-3.5 h-3.5 text-orange-400" />
             <span>{getMotivationalQuote(progressPercent)}</span>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* Quick Note Scratchpad */}
+          <button
+            onClick={onOpenQuickNoteModal}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            title="دفترچه یادداشت شخصی (Alt + N)"
+          >
+            <FileText className="w-3.5 h-3.5 text-pink-300" />
+            <span className="hidden sm:inline">یادداشت سریع</span>
+          </button>
+
+          {/* Shortcuts Help */}
+          <button
+            onClick={onOpenShortcutsModal}
+            className="p-1.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-purple-200 transition-colors"
+            title="کلیدهای میانبر لپ‌تاپ (Shortcuts)"
+          >
+            <Keyboard className="w-4 h-4 text-purple-300" />
+          </button>
+
           {/* Persistent Storage Status & Backup button */}
           <button
             onClick={onOpenStorageModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
             title="وضعیت ذخیره‌سازی در مرورگر و تهیه‌ی فایل پشتیبان (Backup / Restore)"
           >
             <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
-            <span>ذخیره در مرورگر</span>
+            <span className="hidden sm:inline">ذخیره در مرورگر</span>
           </button>
 
           {/* Install on Desktop button */}
@@ -87,20 +199,20 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onExportPng}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
             title="دانلود به عنوان عکس پوستر (PNG)"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>خروجی عکس (PNG)</span>
+            <span className="hidden sm:inline">خروجی عکس</span>
           </button>
 
           <button
             onClick={onPrint}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-xs font-medium text-purple-200 transition-colors"
-            title="چاپ یا ذخیره به عنوان PDF"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/30 text-xs font-medium text-purple-200 transition-colors"
+            title="چاپ یا ذخیره به عنوان PDF (Ctrl + P)"
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>چاپ / PDF</span>
+            <span className="hidden sm:inline">چاپ</span>
           </button>
 
           <button

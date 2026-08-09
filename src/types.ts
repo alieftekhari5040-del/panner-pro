@@ -36,6 +36,7 @@ export interface ScheduleSlot {
 export interface DayPlannerData {
   dateStr: string; // Jalali formatted date e.g. "۱۸ مرداد ۱۴۰۵"
   activeWeekday: WeekdayName;
+  oneBigThing?: string; // Personal #1 top priority focus for the day
   priorities: PriorityTask[];
   goals: GoalItem[];
   habits: DailyHabit[];

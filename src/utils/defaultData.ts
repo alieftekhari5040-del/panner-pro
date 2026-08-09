@@ -6,6 +6,7 @@ export function getDefaultPlannerData(weekday?: WeekdayName): DayPlannerData {
   return {
     dateStr: getJalaliStringForWeekday(targetDay),
     activeWeekday: targetDay,
+    oneBigThing: '',
     priorities: [
       { id: 'p1', text: '', completed: false },
       { id: 'p2', text: '', completed: false },

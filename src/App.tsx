@@ -8,6 +8,7 @@ import { playCheckSound } from './utils/sound';
 import { Header } from './components/Header';
 import { Tabs, type TabId } from './components/Tabs';
 import { DateWeekBar } from './components/DateWeekBar';
+import { OneBigThing } from './components/OneBigThing';
 import { PrioritiesCard } from './components/PrioritiesCard';
 import { GoalsCard } from './components/GoalsCard';
 import { ScheduleCard } from './components/ScheduleCard';
@@ -15,6 +16,8 @@ import { LessonsCard } from './components/LessonsCard';
 import { FooterBar } from './components/FooterBar';
 import { InstallModal } from './components/InstallModal';
 import { StorageModal } from './components/StorageModal';
+import { ShortcutsModal } from './components/ShortcutsModal';
+import { QuickNoteModal } from './components/QuickNoteModal';
 import { HabitTrackerView } from './components/HabitTrackerView';
 import { StatsAnalyticsView } from './components/StatsAnalyticsView';
 
@@ -27,6 +30,9 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+  const [isQuickNoteModalOpen, setIsQuickNoteModalOpen] = useState(false);
+  const [oneBigThingCompleted, setOneBigThingCompleted] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
 
   // Listen for PWA desktop install prompt
@@ -39,6 +45,31 @@ export default function App() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  // Global Keyboard Shortcuts for Laptop Users
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === '1') {
+        e.preventDefault();
+        setActiveTab('today');
+      } else if (e.altKey && e.key === '2') {
+        e.preventDefault();
+        setActiveTab('habits');
+      } else if (e.altKey && e.key === '3') {
+        e.preventDefault();
+        setActiveTab('stats');
+      } else if (e.altKey && (e.key === 'n' || e.key === 'N' || e.key === 'ن')) {
+        e.preventDefault();
+        setIsQuickNoteModalOpen((prev) => !prev);
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        saveDayData(data);
+        setIsStorageModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [data]);
+
   // When activeWeekday changes, load data from storage and ensure date matches that weekday
   useEffect(() => {
     const loaded = loadDayData(activeWeekday);
@@ -46,6 +77,7 @@ export default function App() {
     setData({
       ...loaded,
       dateStr: loaded.dateStr || expectedDate,
+      oneBigThing: loaded.oneBigThing || '',
     });
   }, [activeWeekday]);
 
@@ -77,6 +109,17 @@ export default function App() {
   // Handler: Change Date String manually
   const handleDateChange = (newDate: string) => {
     setData((prev) => ({ ...prev, dateStr: newDate }));
+  };
+
+  // Handler: Change One Big Thing
+  const handleChangeOneBigThing = (text: string) => {
+    setData((prev) => ({ ...prev, oneBigThing: text }));
+  };
+
+  // Handler: Toggle One Big Thing Completed
+  const handleToggleOneBigThing = () => {
+    playCheckSound(soundEnabled);
+    setOneBigThingCompleted((prev) => !prev);
   };
 
   // Handler: Select Weekday
@@ -341,6 +384,8 @@ export default function App() {
           onPrint={handlePrint}
           onOpenInstallModal={() => setIsInstallModalOpen(true)}
           onOpenStorageModal={() => setIsStorageModalOpen(true)}
+          onOpenShortcutsModal={() => setIsShortcutsModalOpen(true)}
+          onOpenQuickNoteModal={() => setIsQuickNoteModalOpen(true)}
           isInstallReady={!!deferredPrompt}
         />
 
@@ -359,6 +404,14 @@ export default function App() {
               onPrevDay={handlePrevDay}
               onNextDay={handleNextDay}
               onToday={handleToday}
+            />
+
+            {/* One Big Thing (#1 Executive Focus for Today) */}
+            <OneBigThing
+              text={data.oneBigThing || ''}
+              onChange={handleChangeOneBigThing}
+              completed={oneBigThingCompleted}
+              onToggle={handleToggleOneBigThing}
             />
 
             {/* Main Content Area: Full-width ScheduleCard, then Priorities & Goals side-by-side below it */}
@@ -424,6 +477,18 @@ export default function App() {
         isOpen={isStorageModalOpen}
         onClose={() => setIsStorageModalOpen(false)}
         onDataRestored={handleDataRestored}
+      />
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <ShortcutsModal
+        isOpen={isShortcutsModalOpen}
+        onClose={() => setIsShortcutsModalOpen(false)}
+      />
+
+      {/* Personal Quick Note / Sticky Scratchpad Modal */}
+      <QuickNoteModal
+        isOpen={isQuickNoteModalOpen}
+        onClose={() => setIsQuickNoteModalOpen(false)}
       />
 
       {/* Export loading badge */}
