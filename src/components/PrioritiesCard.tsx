@@ -44,9 +44,9 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
         </button>
       </div>
 
-      {/* List of priority rows */}
+      {/* List of priority rows with Numbering as requested */}
       <div className="flex flex-col gap-3 mt-1">
-        {priorities.map((task) => (
+        {priorities.map((task, idx) => (
           <div key={task.id} className="row-interactive flex items-center gap-3 p-2.5 rounded-xl group">
             {/* Square rounded checkbox on right (RTL) */}
             <button
@@ -60,6 +60,11 @@ export const PrioritiesCard: React.FC<PrioritiesCardProps> = ({
             >
               {task.completed && <Check className="w-4 h-4 stroke-[3]" />}
             </button>
+
+            {/* Numbering (.1, .2, ...) */}
+            <span className="text-xs sm:text-sm font-semibold text-purple-300/80 w-5 select-none shrink-0">
+              {idx + 1}.
+            </span>
 
             {/* Ruled / Dotted input line */}
             <div className="flex-1 relative">

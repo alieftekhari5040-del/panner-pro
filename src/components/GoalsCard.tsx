@@ -44,9 +44,9 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
         </button>
       </div>
 
-      {/* Inner container */}
+      {/* Inner container (No numbering as requested) */}
       <div className="neon-inner-box p-4 sm:p-5 flex flex-col gap-3">
-        {goals.map((goal, idx) => (
+        {goals.map((goal) => (
           <div key={goal.id} className="row-interactive flex items-center gap-3 p-2.5 rounded-xl group">
             {/* Square Checkbox on right (RTL) */}
             <button
@@ -61,9 +61,7 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
               {goal.completed && <Check className="w-4 h-4 stroke-[3]" />}
             </button>
 
-            <span className="text-xs font-semibold text-purple-400/70 w-4 select-none shrink-0">
-              {idx + 1}.
-            </span>
+            {/* Goal Text Input (No .1, .2 numbers) */}
             <input
               type="text"
               value={goal.text}
@@ -75,6 +73,7 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
                   : 'text-purple-100 placeholder-purple-400/40'
               }`}
             />
+
             <button
               onClick={() => onRemoveGoal(goal.id)}
               className="no-print opacity-0 group-hover:opacity-100 focus:opacity-100 text-purple-400/60 hover:text-red-400 p-1.5 transition-colors shrink-0"

@@ -6,6 +6,7 @@ import { loadDayData, saveDayData, resetDayData } from './utils/storage';
 import { getTodayWeekdayName, getJalaliStringForWeekday, getNextWeekdayName } from './utils/jalali';
 import { playCheckSound } from './utils/sound';
 import { Header } from './components/Header';
+import { Tabs, type TabId } from './components/Tabs';
 import { DateWeekBar } from './components/DateWeekBar';
 import { PrioritiesCard } from './components/PrioritiesCard';
 import { GoalsCard } from './components/GoalsCard';
@@ -13,8 +14,11 @@ import { ScheduleCard } from './components/ScheduleCard';
 import { LessonsCard } from './components/LessonsCard';
 import { FooterBar } from './components/FooterBar';
 import { InstallModal } from './components/InstallModal';
+import { HabitTrackerView } from './components/HabitTrackerView';
+import { StatsAnalyticsView } from './components/StatsAnalyticsView';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState<TabId>('today');
   const [activeWeekday, setActiveWeekday] = useState<WeekdayName>(() => getTodayWeekdayName());
   const [data, setData] = useState<DayPlannerData>(() => loadDayData(activeWeekday));
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -331,54 +335,68 @@ export default function App() {
           isInstallReady={!!deferredPrompt}
         />
 
-        {/* Date & Weekday Bar with Navigation */}
-        <DateWeekBar
-          dateStr={data.dateStr}
-          onDateChange={handleDateChange}
-          activeWeekday={activeWeekday}
-          onSelectWeekday={handleSelectWeekday}
-          onPrevDay={handlePrevDay}
-          onNextDay={handleNextDay}
-          onToday={handleToday}
-        />
+        {/* 3-Tab Navigation Switcher (No-print) */}
+        <Tabs activeTab={activeTab} onChange={setActiveTab} />
 
-        {/* Main Content Area: Full-width ScheduleCard, then Priorities & Goals side-by-side below it */}
-        <div className="flex flex-col gap-6 mb-6">
-          {/* Top: Today's Schedule (برنامه‌ی امروز) */}
-          <ScheduleCard
-            schedule={data.schedule}
-            onChangeTask={handleChangeSlotTask}
-            onToggleSlot={handleToggleSlot}
-            onAddSlot={handleAddSlot}
-            onRemoveSlot={handleRemoveSlot}
-          />
-
-          {/* Below Today's Schedule: Priorities and Goals side by side on desktop */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <PrioritiesCard
-              priorities={data.priorities}
-              onToggle={handleTogglePriority}
-              onChangeText={handleChangePriorityText}
-              onAddPriority={handleAddPriority}
-              onRemovePriority={handleRemovePriority}
+        {/* Tab 1: Today's Planner (برنامه‌ی روزانه) */}
+        {activeTab === 'today' && (
+          <div className="flex flex-col gap-6 animate-in fade-in">
+            {/* Date & Weekday Bar with Navigation */}
+            <DateWeekBar
+              dateStr={data.dateStr}
+              onDateChange={handleDateChange}
+              activeWeekday={activeWeekday}
+              onSelectWeekday={handleSelectWeekday}
+              onPrevDay={handlePrevDay}
+              onNextDay={handleNextDay}
+              onToday={handleToday}
             />
-            <GoalsCard
-              goals={data.goals}
-              onToggleGoal={handleToggleGoal}
-              onChangeText={handleChangeGoalText}
-              onAddGoal={handleAddGoal}
-              onRemoveGoal={handleRemoveGoal}
+
+            {/* Main Content Area: Full-width ScheduleCard, then Priorities & Goals side-by-side below it */}
+            <div className="flex flex-col gap-6">
+              {/* Top: Today's Schedule (برنامه‌ی امروز) */}
+              <ScheduleCard
+                schedule={data.schedule}
+                onChangeTask={handleChangeSlotTask}
+                onToggleSlot={handleToggleSlot}
+                onAddSlot={handleAddSlot}
+                onRemoveSlot={handleRemoveSlot}
+              />
+
+              {/* Below Today's Schedule: Priorities and Goals side by side on desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <PrioritiesCard
+                  priorities={data.priorities}
+                  onToggle={handleTogglePriority}
+                  onChangeText={handleChangePriorityText}
+                  onAddPriority={handleAddPriority}
+                  onRemovePriority={handleRemovePriority}
+                />
+                <GoalsCard
+                  goals={data.goals}
+                  onToggleGoal={handleToggleGoal}
+                  onChangeText={handleChangeGoalText}
+                  onAddGoal={handleAddGoal}
+                  onRemoveGoal={handleRemoveGoal}
+                />
+              </div>
+            </div>
+
+            {/* Bottom Section (Lessons Learned Today) */}
+            <LessonsCard
+              lessons={data.lessons}
+              onChangeLesson={handleChangeLesson}
+              onAddLesson={handleAddLesson}
+              onRemoveLesson={handleRemoveLesson}
             />
           </div>
-        </div>
+        )}
 
-        {/* Bottom Section (Lessons Learned Today) */}
-        <LessonsCard
-          lessons={data.lessons}
-          onChangeLesson={handleChangeLesson}
-          onAddLesson={handleAddLesson}
-          onRemoveLesson={handleRemoveLesson}
-        />
+        {/* Tab 2: Habit Tracker (ردیاب عادت‌ها) */}
+        {activeTab === 'habits' && <HabitTrackerView />}
+
+        {/* Tab 3: Statistics & Analytics (آمار و عملکرد) */}
+        {activeTab === 'stats' && <StatsAnalyticsView />}
 
         {/* Poster Footer Bar */}
         <FooterBar />
