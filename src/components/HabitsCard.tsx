@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { DailyHabit } from '../types';
-import { BookOpen, PlayCircle, Dumbbell, Sparkles, Check, Plus, X } from 'lucide-react';
+import { BookOpen, PlayCircle, Dumbbell, Sparkles, Check, Plus, X, Trash2 } from 'lucide-react';
 
 interface HabitsCardProps {
   habits: DailyHabit[];
@@ -51,17 +51,17 @@ export const HabitsCard: React.FC<HabitsCardProps> = ({
         </div>
         <button
           onClick={() => setIsAdding(!isAdding)}
-          className="no-print p-1.5 rounded-lg bg-purple-950/40 hover:bg-purple-800/60 border border-purple-500/30 text-purple-300 text-xs flex items-center gap-1 transition-all"
+          className="no-print flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-950/40 hover:bg-purple-800/60 border border-purple-500/30 text-purple-300 hover:text-white text-xs transition-all shadow-sm"
           title="افزودن عادت دلخواه"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">عادت جدید</span>
+          <span>عادت جدید</span>
         </button>
       </div>
 
       {/* Optional New Habit Form (no-print) */}
       {isAdding && (
-        <form onSubmit={handleAdd} className="no-print flex items-center gap-2 bg-purple-950/50 p-2 rounded-lg border border-purple-500/40">
+        <form onSubmit={handleAdd} className="no-print flex items-center gap-2 bg-purple-950/50 p-2.5 rounded-lg border border-purple-500/40">
           <input
             type="text"
             value={newHabitText}
@@ -86,8 +86,8 @@ export const HabitsCard: React.FC<HabitsCardProps> = ({
         </form>
       )}
 
-      {/* List of Habits (Exactly matching poster layout) */}
-      <div className="flex flex-col gap-3.5 mt-1">
+      {/* List of Habits */}
+      <div className="flex flex-col gap-3 mt-1">
         {habits.map((habit) => (
           <div
             key={habit.id}
@@ -111,17 +111,15 @@ export const HabitsCard: React.FC<HabitsCardProps> = ({
             {/* Middle: Dashed dotted connector line */}
             <div className="hidden sm:block flex-1 border-b border-dashed border-purple-500/40 mx-2" />
 
-            {/* Left side (RTL): Square Checkbox + optional delete for custom items */}
+            {/* Left side (RTL): Square Checkbox + remove button */}
             <div className="flex items-center gap-2">
-              {habit.icon === 'custom' && (
-                <button
-                  onClick={() => onRemoveHabit(habit.id)}
-                  className="no-print opacity-0 group-hover:opacity-100 text-red-400/70 hover:text-red-400 p-1 transition-all"
-                  title="حذف"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
+              <button
+                onClick={() => onRemoveHabit(habit.id)}
+                className="no-print opacity-0 group-hover:opacity-100 focus:opacity-100 text-purple-400/60 hover:text-red-400 p-1 transition-all"
+                title="حذف این عادت"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
               <button
                 onClick={() => onToggle(habit.id)}
                 className={`w-6 h-6 rounded-md flex items-center justify-center transition-all duration-200 border-2 shrink-0 ${
@@ -136,6 +134,11 @@ export const HabitsCard: React.FC<HabitsCardProps> = ({
             </div>
           </div>
         ))}
+        {habits.length === 0 && (
+          <div className="text-center py-3 text-purple-400/60 text-sm">
+            هیچ عادتی ثبت نشده است. روی «عادت جدید» کلیک کنید.
+          </div>
+        )}
       </div>
     </div>
   );

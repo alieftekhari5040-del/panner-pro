@@ -87,6 +87,29 @@ export default function App() {
     }));
   };
 
+  // Handler: Add Priority Task
+  const handleAddPriority = () => {
+    setData((prev) => ({
+      ...prev,
+      priorities: [
+        ...prev.priorities,
+        {
+          id: `p_${Date.now()}`,
+          text: '',
+          completed: false,
+        },
+      ],
+    }));
+  };
+
+  // Handler: Remove Priority Task
+  const handleRemovePriority = (id: string) => {
+    setData((prev) => ({
+      ...prev,
+      priorities: prev.priorities.filter((item) => item.id !== id),
+    }));
+  };
+
   // Handler: Change Goal Text
   const handleChangeGoalText = (id: string, text: string) => {
     setData((prev) => ({
@@ -94,6 +117,28 @@ export default function App() {
       goals: prev.goals.map((item) =>
         item.id === id ? { ...item, text } : item
       ),
+    }));
+  };
+
+  // Handler: Add Goal Item
+  const handleAddGoal = () => {
+    setData((prev) => ({
+      ...prev,
+      goals: [
+        ...prev.goals,
+        {
+          id: `g_${Date.now()}`,
+          text: '',
+        },
+      ],
+    }));
+  };
+
+  // Handler: Remove Goal Item
+  const handleRemoveGoal = (id: string) => {
+    setData((prev) => ({
+      ...prev,
+      goals: prev.goals.filter((item) => item.id !== id),
     }));
   };
 
@@ -143,16 +188,6 @@ export default function App() {
     }));
   };
 
-  // Handler: Change Schedule Time
-  const handleChangeSlotTime = (id: string, time: string) => {
-    setData((prev) => ({
-      ...prev,
-      schedule: prev.schedule.map((slot) =>
-        slot.id === id ? { ...slot, time } : slot
-      ),
-    }));
-  };
-
   // Handler: Change Schedule Task
   const handleChangeSlotTask = (id: string, task: string) => {
     setData((prev) => ({
@@ -194,6 +229,22 @@ export default function App() {
       newLessons[index] = text;
       return { ...prev, lessons: newLessons };
     });
+  };
+
+  // Handler: Add Lesson
+  const handleAddLesson = () => {
+    setData((prev) => ({
+      ...prev,
+      lessons: [...prev.lessons, ''],
+    }));
+  };
+
+  // Handler: Remove Lesson
+  const handleRemoveLesson = (index: number) => {
+    setData((prev) => ({
+      ...prev,
+      lessons: prev.lessons.filter((_, i) => i !== index),
+    }));
   };
 
   // Handler: Reset Today
@@ -276,10 +327,14 @@ export default function App() {
               priorities={data.priorities}
               onToggle={handleTogglePriority}
               onChangeText={handleChangePriorityText}
+              onAddPriority={handleAddPriority}
+              onRemovePriority={handleRemovePriority}
             />
             <GoalsCard
               goals={data.goals}
               onChangeText={handleChangeGoalText}
+              onAddGoal={handleAddGoal}
+              onRemoveGoal={handleRemoveGoal}
             />
             <HabitsCard
               habits={data.habits}
@@ -294,7 +349,6 @@ export default function App() {
             <ScheduleCard
               schedule={data.schedule}
               onChangeTask={handleChangeSlotTask}
-              onChangeTime={handleChangeSlotTime}
               onToggleSlot={handleToggleSlot}
               onAddSlot={handleAddSlot}
               onRemoveSlot={handleRemoveSlot}
@@ -306,6 +360,8 @@ export default function App() {
         <LessonsCard
           lessons={data.lessons}
           onChangeLesson={handleChangeLesson}
+          onAddLesson={handleAddLesson}
+          onRemoveLesson={handleRemoveLesson}
         />
 
         {/* Poster Footer Bar */}
