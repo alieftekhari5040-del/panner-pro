@@ -1,12 +1,15 @@
 import type { DayPlannerData, WeekdayName } from '../types';
-import { getJalaliStringForWeekday, getTodayWeekdayName } from './jalali';
+import { toIsoDateString, formatJalaliDate, getWeekdayNameOfDate, parseIsoDate } from './jalali';
 
-export function getDefaultPlannerData(weekday?: WeekdayName): DayPlannerData {
-  const targetDay = weekday || getTodayWeekdayName();
+export function getDefaultPlannerData(isoDateStr?: string): DayPlannerData {
+  const isoDate = isoDateStr || toIsoDateString();
+  const dateObj = parseIsoDate(isoDate);
+  const weekday: WeekdayName = getWeekdayNameOfDate(dateObj);
+
   return {
-    dateStr: getJalaliStringForWeekday(targetDay),
-    activeWeekday: targetDay,
-    oneBigThing: '',
+    isoDate,
+    dateStr: formatJalaliDate(dateObj),
+    activeWeekday: weekday,
     priorities: [
       { id: 'p1', text: '', completed: false },
       { id: 'p2', text: '', completed: false },

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import type { WeekdayName } from '../types';
-import { ALL_WEEKDAYS } from '../utils/jalali';
-import { loadDayData } from '../utils/storage';
+import { ALL_WEEKDAYS, getWeekIsoDates, toIsoDateString, addDaysToIso, formatShortJalaliDate, parseIsoDate } from '../utils/jalali';
+import { loadDayDataByIso } from '../utils/storage';
 import {
   BarChart3,
   Award,
@@ -16,43 +15,76 @@ import {
 } from 'lucide-react';
 import type { HabitTrackItem } from './HabitTrackerView';
 
-export const StatsAnalyticsView: React.FC = () => {
-  // Load all 7 days of data — ONLY counting tasks that have actual text typed or are completed! (Fixes 137 phantom tasks bug)
-  const dayStats = ALL_WEEKDAYS.map((day) => {
-    const data = loadDayData(day);
-    
-    // Count only non-empty or completed priorities
-    const activePriorities = data.priorities.filter((p) => p.text.trim().length > 0 || p.completed);
-    const prioritiesTotal = activePriorities.length;
-    const prioritiesDone = activePriorities.filter((p) => p.completed).length;
+interface StatsProps {
+  currentIsoDate?: string;
+}
 
-    // Count only non-empty or completed goals
-    const activeGoals = data.goals.filter((g) => g.text.trim().length > 0 || g.completed);
-    const goalsTotal = activeGoals.length;
-    const goalsDone = activeGoals.filter((g) => g.completed).length;
+export const StatsAnalyticsView: React.FC<StatsProps> = ({
+  currentIsoDate = toIsoDateString(),
+}) => {
+  const [timeframe, setTimeframe] = useState<'week' | 'month'>('week');
 
-    // Count only non-empty or completed schedule rows
-    const activeSchedule = data.schedule.filter((s) => s.task.trim().length > 0 || s.completed);
-    const scheduleTotal = activeSchedule.length;
-    const scheduleDone = activeSchedule.filter((s) => s.completed).length;
+  // Calculate dates to inspect based on timeframe
+  const datesToInspect = React.useMemo(() => {
+    if (timeframe === 'week') {
+      return getWeekIsoDates(currentIsoDate).map((d) => ({
+        iso: d.iso,
+        dayName: d.day,
+        label: d.label,
+      }));
+    } else {
+      // 30 days up to currentIsoDate
+      const arr = [];
+      for (let i = 29; i >= 0; i--) {
+        const iso = addDaysToIso(currentIsoDate, -i);
+        const dateObj = parseIsoDate(iso);
+        arr.push({
+          iso,
+          dayName: formatShortJalaliDate(dateObj),
+          label: formatShortJalaliDate(dateObj),
+        });
+      }
+      return arr;
+    }
+  }, [currentIsoDate, timeframe]);
 
-    const total = prioritiesTotal + goalsTotal + scheduleTotal;
-    const completed = prioritiesDone + goalsDone + scheduleDone;
-    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+  // Load stats for inspected dates — ONLY counting tasks that have actual text typed or are completed! (Fixes 137 phantom tasks bug)
+  const dayStats = React.useMemo(() => {
+    return datesToInspect.map((item) => {
+      const data = loadDayDataByIso(item.iso);
 
-    return {
-      day,
-      total,
-      completed,
-      percent,
-      prioritiesTotal,
-      prioritiesDone,
-      goalsTotal,
-      goalsDone,
-      scheduleTotal,
-      scheduleDone,
-    };
-  });
+      const activePriorities = data.priorities.filter((p) => p.text.trim().length > 0 || p.completed);
+      const prioritiesTotal = activePriorities.length;
+      const prioritiesDone = activePriorities.filter((p) => p.completed).length;
+
+      const activeGoals = data.goals.filter((g) => g.text.trim().length > 0 || g.completed);
+      const goalsTotal = activeGoals.length;
+      const goalsDone = activeGoals.filter((g) => g.completed).length;
+
+      const activeSchedule = data.schedule.filter((s) => s.task.trim().length > 0 || s.completed);
+      const scheduleTotal = activeSchedule.length;
+      const scheduleDone = activeSchedule.filter((s) => s.completed).length;
+
+      const total = prioritiesTotal + goalsTotal + scheduleTotal;
+      const completed = prioritiesDone + goalsDone + scheduleDone;
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      return {
+        iso: item.iso,
+        day: item.dayName,
+        label: item.label,
+        total,
+        completed,
+        percent,
+        prioritiesTotal,
+        prioritiesDone,
+        goalsTotal,
+        goalsDone,
+        scheduleTotal,
+        scheduleDone,
+      };
+    });
+  }, [datesToInspect]);
 
   // Load habits from storage
   const [habits] = useState<HabitTrackItem[]>(() => {
@@ -88,55 +120,75 @@ export const StatsAnalyticsView: React.FC = () => {
 
   const totalTasksCompleted = dayStats.reduce((acc, curr) => acc + curr.completed, 0);
   const totalTasksAll = dayStats.reduce((acc, curr) => acc + curr.total, 0);
-  const weeklyAverage = totalTasksAll > 0 ? Math.round((totalTasksCompleted / totalTasksAll) * 100) : 0;
+  const periodAverage = totalTasksAll > 0 ? Math.round((totalTasksCompleted / totalTasksAll) * 100) : 0;
 
   // Find most productive day
   const bestDayObj = [...dayStats].sort((a, b) => b.completed - a.completed)[0] || dayStats[0];
 
   // Interactive selected day for breakdown
-  const [selectedDay, setSelectedDay] = useState<WeekdayName>(bestDayObj.day);
-  const selectedDayData = dayStats.find((d) => d.day === selectedDay) || dayStats[0];
+  const [selectedIso, setSelectedIso] = useState<string>(bestDayObj.iso);
+  const selectedDayData = dayStats.find((d) => d.iso === selectedIso) || dayStats[0];
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in">
-      {/* Header Banner */}
+      {/* Header Banner & Timeframe Switcher */}
       <div className="neon-box p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <span className="inline-block w-1.5 h-6 bg-gradient-to-b from-purple-400 to-pink-500 rounded-full shadow-[0_0_12px_rgba(168,85,247,0.8)]" />
             <h2 className="text-xl sm:text-2xl font-bold text-white">
-              آمار و تحلیل عملکرد هفتگی (Productivity Analytics)
+              آمار و تحلیل واقعی عملکرد (Real Productivity Analytics)
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-purple-300/80 mt-1">
-            بررسی جامع راندمان روزهای هفته، تفکیک دسته‌بندی کارها و پایبندی به عادت‌ها
+            ارزیابی دقیق عملکرد روزانه و هفتگی شما بر اساس تاریخ‌های شمسی واقعی
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-purple-900/40 border border-purple-500/40 text-xs font-bold text-purple-200">
-          <Sparkles className="w-4 h-4 text-purple-400" />
-          <span>راندمان کل هفته: {weeklyAverage}٪ موفقیت</span>
+        
+        {/* Timeframe selector tabs */}
+        <div className="flex items-center gap-1 bg-purple-950/60 p-1 rounded-xl border border-purple-500/30">
+          <button
+            onClick={() => setTimeframe('week')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              timeframe === 'week'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-purple-300 hover:text-white'
+            }`}
+          >
+            هفته جاری
+          </button>
+          <button
+            onClick={() => setTimeframe('month')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+              timeframe === 'month'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-purple-300 hover:text-white'
+            }`}
+          >
+            ۳۰ روز گذشته (Heatmap)
+          </button>
         </div>
       </div>
 
-      {/* 4 Summary Stat Cards (Clean RTL Layout without awkward floating badges) */}
+      {/* 4 Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Weekly average */}
+        {/* Card 1: Period average */}
         <div className="neon-box p-5 flex items-center justify-between group hover:border-purple-400/60 transition-all">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-purple-600/25 border border-purple-400/40 flex items-center justify-center shrink-0">
               <BarChart3 className="w-6 h-6 text-purple-300" />
             </div>
             <div>
-              <p className="text-xs text-purple-300/90 font-medium">راندمان کل هفته</p>
-              <p className="text-2xl font-black text-white mt-0.5">{weeklyAverage}٪</p>
+              <p className="text-xs text-purple-300/90 font-medium">راندمان {timeframe === 'week' ? 'این هفته' : '۳۰ روز'}</p>
+              <p className="text-2xl font-black text-white mt-0.5">{periodAverage}٪</p>
             </div>
           </div>
           <span className="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-full shrink-0">
-            هفتگی
+            واقعی
           </span>
         </div>
 
-        {/* Card 2: Total Completed (FIXED: ZERO PHANTOM 137 TASKS BUG) */}
+        {/* Card 2: Total Completed */}
         <div className="neon-box p-5 flex items-center justify-between group hover:border-indigo-400/60 transition-all">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-indigo-600/25 border border-indigo-400/40 flex items-center justify-center shrink-0">
@@ -164,8 +216,8 @@ export const StatsAnalyticsView: React.FC = () => {
               <Award className="w-6 h-6 text-pink-300" />
             </div>
             <div>
-              <p className="text-xs text-purple-300/90 font-medium">فعال‌ترین روز هفته</p>
-              <p className="text-base sm:text-lg font-bold text-white mt-0.5">
+              <p className="text-xs text-purple-300/90 font-medium">فعال‌ترین روز</p>
+              <p className="text-sm sm:text-base font-bold text-white mt-0.5">
                 {bestDayObj.day} <span className="text-xs font-normal text-purple-300">({bestDayObj.completed} کار)</span>
               </p>
             </div>
@@ -192,69 +244,99 @@ export const StatsAnalyticsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Interactive Bar Chart for 7 Days */}
+      {/* Interactive Bar Chart for Current Week OR 30-Day Heatmap */}
       <div className="neon-box p-6 flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>نمودار راندمان ۷ روز هفته</span>
+              <span>{timeframe === 'week' ? 'نمودار راندمان ۷ روز هفته' : 'نقشه حرارتی ۳۰ روز گذشته (Heatmap)'}</span>
               <span className="text-xs font-normal text-purple-300 bg-purple-900/50 px-2.5 py-0.5 rounded-full border border-purple-500/30">
                 روی هر روز کلیک کنید
               </span>
             </h3>
             <p className="text-xs text-purple-300/80 mt-1">
-              درصد انجام کارهای برنامه‌ریزی‌شده به تفکیک روز (شنبه تا جمعه)
+              {timeframe === 'week'
+                ? 'مشاهده میزان موفقیت روزانه بر اساس تاریخ‌های شمسی هفته جاری'
+                : 'بررسی پیوستگی و میزان فعالیت شما در ۳۰ روز اخیر'}
             </p>
           </div>
           <div className="text-xs text-purple-200 bg-purple-950/60 px-3 py-1.5 rounded-xl border border-purple-500/30">
-            روز انتخاب‌شده: <strong className="text-white font-bold">{selectedDay} ({selectedDayData.percent}٪)</strong>
+            روز انتخاب‌شده: <strong className="text-white font-bold">{selectedDayData.day} ({selectedDayData.percent}٪)</strong>
           </div>
         </div>
 
-        {/* Bar chart container */}
-        <div className="grid grid-cols-7 gap-2 sm:gap-4 items-end h-60 pt-6 border-b border-purple-500/30 pb-4">
-          {dayStats.map((st) => {
-            const heightPx = Math.max(20, Math.round((st.percent / 100) * 170));
-            const isSelected = st.day === selectedDay;
+        {/* Bar chart / Heatmap container */}
+        {timeframe === 'week' ? (
+          <div className="grid grid-cols-7 gap-2 sm:gap-4 items-end h-60 pt-6 border-b border-purple-500/30 pb-4">
+            {dayStats.map((st) => {
+              const heightPx = Math.max(20, Math.round((st.percent / 100) * 170));
+              const isSelected = st.iso === selectedIso;
 
-            return (
-              <button
-                key={st.day}
-                onClick={() => setSelectedDay(st.day)}
-                className={`flex flex-col items-center gap-2 group outline-none transition-all ${
-                  isSelected ? 'scale-105' : 'hover:scale-102 opacity-85 hover:opacity-100'
-                }`}
-              >
-                <span className={`text-xs font-bold transition-colors ${
-                  isSelected ? 'text-orange-300 font-extrabold' : 'text-purple-200'
-                }`}>
-                  {st.percent}٪
-                </span>
-                <div
-                  className={`w-full max-w-[48px] rounded-t-2xl h-44 flex items-end justify-center overflow-hidden p-1 border transition-all ${
-                    isSelected
-                      ? 'bg-purple-900/80 border-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.4)]'
-                      : 'bg-purple-950/60 border-purple-500/30 group-hover:border-purple-400'
+              return (
+                <button
+                  key={st.iso}
+                  onClick={() => setSelectedIso(st.iso)}
+                  className={`flex flex-col items-center gap-2 group outline-none transition-all ${
+                    isSelected ? 'scale-105' : 'hover:scale-102 opacity-85 hover:opacity-100'
                   }`}
                 >
+                  <span className={`text-xs font-bold transition-colors ${
+                    isSelected ? 'text-orange-300 font-extrabold' : 'text-purple-200'
+                  }`}>
+                    {st.percent}٪
+                  </span>
                   <div
-                    className={`w-full rounded-t-xl transition-all duration-500 ${
+                    className={`w-full max-w-[48px] rounded-t-2xl h-44 flex items-end justify-center overflow-hidden p-1 border transition-all ${
                       isSelected
-                        ? 'bg-gradient-to-t from-purple-600 via-pink-500 to-orange-400'
-                        : 'bg-gradient-to-t from-purple-700 to-purple-500'
+                        ? 'bg-purple-900/80 border-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.4)]'
+                        : 'bg-purple-950/60 border-purple-500/30 group-hover:border-purple-400'
                     }`}
-                    style={{ height: `${heightPx}px` }}
-                  />
-                </div>
-                <span className={`text-xs sm:text-sm font-semibold transition-colors ${
-                  isSelected ? 'text-white font-extrabold' : 'text-purple-200'
-                }`}>
-                  {st.day}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+                  >
+                    <div
+                      className={`w-full rounded-t-xl transition-all duration-500 ${
+                        isSelected
+                          ? 'bg-gradient-to-t from-purple-600 via-pink-500 to-orange-400'
+                          : 'bg-gradient-to-t from-purple-700 to-purple-500'
+                      }`}
+                      style={{ height: `${heightPx}px` }}
+                    />
+                  </div>
+                  <span className={`text-xs sm:text-sm font-semibold transition-colors ${
+                    isSelected ? 'text-white font-extrabold' : 'text-purple-200'
+                  }`}>
+                    {st.day}
+                  </span>
+                  <span className="text-[10px] text-purple-400">{st.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          /* 30-Day GitHub Style Contribution Heatmap */
+          <div className="grid grid-cols-6 sm:grid-cols-10 gap-2.5 py-4 border-b border-purple-500/30">
+            {dayStats.map((st) => {
+              const isSelected = st.iso === selectedIso;
+              let bgClass = 'bg-purple-950/40 border-purple-500/20';
+              if (st.percent > 0 && st.percent < 40) bgClass = 'bg-purple-700/60 border-purple-500/50';
+              if (st.percent >= 40 && st.percent < 75) bgClass = 'bg-purple-600 border-purple-400';
+              if (st.percent >= 75) bgClass = 'bg-gradient-to-tr from-purple-500 to-orange-400 border-orange-300';
+
+              return (
+                <button
+                  key={st.iso}
+                  onClick={() => setSelectedIso(st.iso)}
+                  className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+                    bgClass
+                  } ${isSelected ? 'ring-2 ring-orange-400 scale-105 shadow-lg' : 'hover:scale-105'}`}
+                  title={`${st.day} ${st.label}: ${st.percent}٪ انجام شد`}
+                >
+                  <span className="text-[11px] font-bold text-white">{st.label}</span>
+                  <span className="text-[10px] font-semibold text-purple-200">{st.percent}٪</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Selected Day Detailed Scorecard Below Chart */}
         <div className="neon-inner-box p-5 flex flex-col sm:flex-row items-center justify-between gap-4 bg-purple-950/30">
@@ -264,10 +346,10 @@ export const StatsAnalyticsView: React.FC = () => {
             </div>
             <div>
               <h4 className="text-base font-bold text-white">
-                جزئیات عملکرد روز {selectedDay}
+                جزئیات عملکرد روز {selectedDayData.day} ({selectedDayData.label})
               </h4>
               <p className="text-xs text-purple-300/90 mt-0.5">
-                مجموع کارهای مفید انجام‌شده در این روز: <strong>{selectedDayData.completed} از {selectedDayData.total} مورد</strong>
+                مجموع کارهای مفید انجام‌شده در این تاریخ: <strong>{selectedDayData.completed} از {selectedDayData.total} مورد</strong>
               </p>
             </div>
           </div>
@@ -428,7 +510,7 @@ export const StatsAnalyticsView: React.FC = () => {
             </span>
           </h4>
           <p className="text-sm text-purple-200 mt-1.5 leading-relaxed">
-            شما تا این لحظه در طول هفته جاری <strong>{totalTasksCompleted} فعالیت مفید</strong> را با موفقیت انجام داده‌اید. راندمان شما در روز <strong>{bestDayObj.day}</strong> با <strong>{bestDayObj.percent}٪</strong> در بالاترین سطح بوده است. نرخ پایبندی <strong>{habitRate}٪</strong> به عادت‌ها نشان‌دهنده‌ی نظم عالی شماست. پیشنهاد می‌شود برای حفظ مسیر صعود، وظایف اولویت‌دار روزهای پایانی هفته را از شب قبل مشخص کنید! 🚀
+            شما تا این لحظه در بازه انتخابی <strong>{totalTasksCompleted} فعالیت مفید</strong> را با موفقیت انجام داده‌اید. راندمان شما در روز <strong>{bestDayObj.day}</strong> با <strong>{bestDayObj.percent}٪</strong> در بالاترین سطح بوده است. نرخ پایبندی <strong>{habitRate}٪</strong> به عادت‌ها نشان‌دهنده‌ی نظم عالی شماست. پیشنهاد می‌شود برای حفظ مسیر صعود، وظایف اولویت‌دار روزهای پایانی هفته را از شب قبل مشخص کنید! 🚀
           </p>
         </div>
       </div>

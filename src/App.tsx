@@ -1,8 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import type { DayPlannerData, WeekdayName } from './types';
-import { loadDayData, saveDayData, resetDayData } from './utils/storage';
-import { getTodayWeekdayName, getJalaliStringForWeekday, getNextWeekdayName, ALL_WEEKDAYS } from './utils/jalali';
+import type { DayPlannerData } from './types';
+import { loadDayDataByIso, saveDayData, resetDayData } from './utils/storage';
+import {
+  toIsoDateString,
+  addDaysToIso,
+  parseIsoDate,
+  getWeekdayNameOfDate,
+} from './utils/jalali';
 import { playCheckSound } from './utils/sound';
 import { Header } from './components/Header';
 import { Tabs, type TabId } from './components/Tabs';
@@ -16,18 +21,19 @@ import { ShortcutsModal } from './components/ShortcutsModal';
 import { HabitTrackerView } from './components/HabitTrackerView';
 import { StatsAnalyticsView } from './components/StatsAnalyticsView';
 
-const LAST_WEEKDAY_KEY = 'ascent_blueprint_last_weekday';
+const LAST_ISO_KEY = 'ascent_blueprint_last_iso';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('today');
-  const [activeWeekday, setActiveWeekday] = useState<WeekdayName>(() => {
+  const [currentIso, setCurrentIso] = useState<string>(() => {
     try {
-      const last = localStorage.getItem(LAST_WEEKDAY_KEY) as WeekdayName;
-      if (last && ALL_WEEKDAYS.includes(last)) return last;
+      const last = localStorage.getItem(LAST_ISO_KEY);
+      if (last && last.includes('-')) return last;
     } catch {}
-    return getTodayWeekdayName();
+    return toIsoDateString();
   });
-  const [data, setData] = useState<DayPlannerData>(() => loadDayData(activeWeekday));
+
+  const [data, setData] = useState<DayPlannerData>(() => loadDayDataByIso(currentIso));
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -50,18 +56,14 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [data]);
 
-  // When activeWeekday changes, load data from storage and ensure date matches that weekday
+  // When currentIso changes, load data from storage
   useEffect(() => {
     try {
-      localStorage.setItem(LAST_WEEKDAY_KEY, activeWeekday);
+      localStorage.setItem(LAST_ISO_KEY, currentIso);
     } catch {}
-    const loaded = loadDayData(activeWeekday);
-    const expectedDate = getJalaliStringForWeekday(activeWeekday);
-    setData({
-      ...loaded,
-      dateStr: loaded.dateStr || expectedDate,
-    });
-  }, [activeWeekday]);
+    const loaded = loadDayDataByIso(currentIso);
+    setData(loaded);
+  }, [currentIso]);
 
   // AUTOMATIC BROWSER SAVING ON EVERY CHANGE
   useEffect(() => {
@@ -91,28 +93,40 @@ export default function App() {
     setData((prev) => ({ ...prev, dateStr: newDate }));
   };
 
-  // Handler: Select Weekday
-  const handleSelectWeekday = (day: WeekdayName) => {
+  // Handler: Select a specific date from week bar
+  const handleSelectIsoDate = (iso: string) => {
     playCheckSound(soundEnabled);
-    setActiveWeekday(day);
+    setCurrentIso(iso);
   };
 
-  // Handler: Prev Day
+  // Handler: Prev Day (-1 day)
   const handlePrevDay = () => {
-    const prevDay = getNextWeekdayName(activeWeekday, -1);
-    handleSelectWeekday(prevDay);
+    const prevIso = addDaysToIso(currentIso, -1);
+    handleSelectIsoDate(prevIso);
   };
 
-  // Handler: Next Day
+  // Handler: Next Day (+1 day)
   const handleNextDay = () => {
-    const nextDay = getNextWeekdayName(activeWeekday, 1);
-    handleSelectWeekday(nextDay);
+    const nextIso = addDaysToIso(currentIso, 1);
+    handleSelectIsoDate(nextIso);
   };
 
-  // Handler: Today
+  // Handler: Prev Week (-7 days)
+  const handlePrevWeek = () => {
+    const prevWeekIso = addDaysToIso(currentIso, -7);
+    handleSelectIsoDate(prevWeekIso);
+  };
+
+  // Handler: Next Week (+7 days)
+  const handleNextWeek = () => {
+    const nextWeekIso = addDaysToIso(currentIso, 7);
+    handleSelectIsoDate(nextWeekIso);
+  };
+
+  // Handler: Today (current real date)
   const handleToday = () => {
-    const todayDay = getTodayWeekdayName();
-    handleSelectWeekday(todayDay);
+    const todayIso = toIsoDateString();
+    handleSelectIsoDate(todayIso);
   };
 
   // Handler: Toggle Priority Checkbox
@@ -275,8 +289,8 @@ export default function App() {
 
   // Handler: Reset Today
   const handleReset = () => {
-    if (window.confirm(`آیا از بازنشانی داده‌های روز ${activeWeekday} اطمینان دارید؟`)) {
-      const reset = resetDayData(activeWeekday);
+    if (window.confirm(`آیا از بازنشانی داده‌های روز ${data.activeWeekday} اطمینان دارید؟`)) {
+      const reset = resetDayData(currentIso);
       setData(reset);
     }
   };
@@ -312,14 +326,17 @@ export default function App() {
         {/* Tab 1: Today's Planner (برنامه‌ی روزانه) */}
         {activeTab === 'today' && (
           <div className="flex flex-col gap-5 animate-in fade-in">
-            {/* Date & Weekday Bar with Navigation */}
+            {/* Date & Weekday Bar with Infinite Week & Day Navigation */}
             <DateWeekBar
+              isoDate={data.isoDate}
               dateStr={data.dateStr}
               onDateChange={handleDateChange}
-              activeWeekday={activeWeekday}
-              onSelectWeekday={handleSelectWeekday}
+              activeWeekday={data.activeWeekday}
+              onSelectIsoDate={handleSelectIsoDate}
               onPrevDay={handlePrevDay}
               onNextDay={handleNextDay}
+              onPrevWeek={handlePrevWeek}
+              onNextWeek={handleNextWeek}
               onToday={handleToday}
             />
 
@@ -366,8 +383,8 @@ export default function App() {
         {/* Tab 2: Habit Tracker (ردیاب عادت‌ها) */}
         {activeTab === 'habits' && <HabitTrackerView />}
 
-        {/* Tab 3: Statistics & Analytics (آمار و عملکرد) */}
-        {activeTab === 'stats' && <StatsAnalyticsView />}
+        {/* Tab 3: Statistics & Analytics (آمار و عملکرد) - WITH REAL DATES AND HEATMAPS */}
+        {activeTab === 'stats' && <StatsAnalyticsView currentIsoDate={data.isoDate} />}
 
         {/* Poster Footer Bar */}
         <FooterBar />
