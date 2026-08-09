@@ -44,7 +44,7 @@ export default function App() {
     saveDayData(data);
   }, [data]);
 
-  // Calculate Progress Percent (excluding removed habits)
+  // Calculate Progress Percent
   const totalItems =
     data.priorities.length +
     data.schedule.filter((s) => s.task.trim().length > 0).length;
@@ -59,8 +59,8 @@ export default function App() {
   useEffect(() => {
     if (progressPercent === 100 && completedItems >= 3) {
       confetti({
-        particleCount: 70,
-        spread: 60,
+        particleCount: 80,
+        spread: 70,
         origin: { y: 0.6 },
       });
     }
@@ -73,6 +73,7 @@ export default function App() {
 
   // Handler: Select Weekday
   const handleSelectWeekday = (day: WeekdayName) => {
+    playCheckSound(soundEnabled);
     setActiveWeekday(day);
   };
 
@@ -235,7 +236,6 @@ export default function App() {
     if (!boardRef.current) return;
     setIsExporting(true);
     try {
-      // Add temporary styling class for clean poster rendering
       boardRef.current.classList.add('exporting-poster');
       const canvas = await html2canvas(boardRef.current, {
         backgroundColor: '#070514',
@@ -275,17 +275,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-center p-3 sm:p-6 md:p-8">
-      {/* Background Cyber Glow & Ambient Gradients */}
+      {/* Dynamic Animated Ambient Aurora & Glow Orbs */}
       <div className="fixed inset-0 pointer-events-none -z-10 bg-[#070514] overflow-hidden">
-        <div className="absolute top-[-10%] right-[15%] w-[450px] h-[450px] bg-purple-700/15 rounded-full blur-[140px]" />
-        <div className="absolute bottom-[-10%] left-[10%] w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[160px]" />
-        <div className="absolute top-[40%] left-[50%] -translate-x-1/2 w-[600px] h-[300px] bg-purple-600/10 rounded-full blur-[180px]" />
+        <div className="absolute top-[-15%] right-[15%] w-[500px] h-[500px] bg-purple-700/20 rounded-full blur-[140px] animate-aurora" />
+        <div className="absolute bottom-[-15%] left-[10%] w-[550px] h-[550px] bg-indigo-900/25 rounded-full blur-[160px] animate-aurora" style={{ animationDelay: '4s' }} />
+        <div className="absolute top-[35%] left-[50%] -translate-x-1/2 w-[650px] h-[350px] bg-purple-600/15 rounded-full blur-[180px] animate-aurora" style={{ animationDelay: '8s' }} />
       </div>
 
       {/* Main Printable Planner Board Container */}
       <div
         ref={boardRef}
-        className="w-full max-w-[1180px] bg-[#0c081e]/80 border-2 border-purple-500/50 rounded-3xl p-4 sm:p-7 md:p-9 shadow-[0_0_50px_rgba(139,92,246,0.25)] backdrop-blur-xl relative transition-all"
+        className="w-full max-w-[1180px] bg-[#0c081e]/85 border-2 border-purple-500/60 rounded-3xl p-4 sm:p-7 md:p-9 shadow-[0_0_60px_rgba(139,92,246,0.3)] backdrop-blur-2xl relative transition-all animate-float"
       >
         {/* Header & Controls */}
         <Header
@@ -358,7 +358,7 @@ export default function App() {
 
       {/* Export loading badge */}
       {isExporting && (
-        <div className="fixed bottom-6 left-6 z-50 bg-purple-900/90 border border-purple-400 text-white px-4 py-2 rounded-xl shadow-lg text-sm flex items-center gap-2">
+        <div className="fixed bottom-6 left-6 z-50 bg-purple-900/95 border border-purple-400 text-white px-4 py-2.5 rounded-2xl shadow-2xl text-sm flex items-center gap-2.5 animate-bounce">
           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           <span>در حال تولید پوستر با کیفیت بالا...</span>
         </div>

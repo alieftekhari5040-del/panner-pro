@@ -20,14 +20,19 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
       {/* Card Title with indicator pill and Add Goal button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <span className="inline-block w-1.5 h-5 bg-gradient-to-b from-orange-400 to-red-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.8)]" />
+          <span className="inline-block w-1.5 h-5 bg-gradient-to-b from-orange-400 to-red-500 rounded-full shadow-[0_0_12px_rgba(249,115,22,0.9)] animate-pulse" />
           <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide">
             اهداف امروز
           </h2>
+          {goals.length > 0 && (
+            <span className="no-print text-[11px] font-bold bg-purple-900/50 border border-purple-400/30 text-purple-200 px-2 py-0.5 rounded-full">
+              {goals.length} هدف
+            </span>
+          )}
         </div>
         <button
           onClick={onAddGoal}
-          className="no-print flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-950/40 hover:bg-purple-800/60 border border-purple-500/30 text-purple-300 hover:text-white text-xs transition-all shadow-sm"
+          className="no-print flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-950/50 hover:bg-purple-800/70 border border-purple-500/40 text-purple-200 hover:text-white text-xs transition-all shadow-sm hover:scale-105"
           title="افزودن هدف جدید"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -36,9 +41,9 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
       </div>
 
       {/* Inner glowing bordered container with horizontal ruled lines */}
-      <div className="neon-inner-box p-4 sm:p-5 flex flex-col gap-3.5">
+      <div className="neon-inner-box p-4 sm:p-5 flex flex-col gap-3">
         {goals.map((goal, idx) => (
-          <div key={goal.id} className="flex items-center gap-2 group">
+          <div key={goal.id} className="row-interactive flex items-center gap-2.5 p-2 rounded-xl group">
             <span className="text-xs font-semibold text-purple-400/70 w-4 select-none">
               {idx + 1}.
             </span>
@@ -51,7 +56,7 @@ export const GoalsCard: React.FC<GoalsCardProps> = ({
             />
             <button
               onClick={() => onRemoveGoal(goal.id)}
-              className="no-print opacity-0 group-hover:opacity-100 focus:opacity-100 text-purple-400/60 hover:text-red-400 p-1.5 transition-all"
+              className="no-print opacity-0 group-hover:opacity-100 focus:opacity-100 text-purple-400/60 hover:text-red-400 p-1.5 transition-all hover:scale-110"
               title="حذف این هدف"
             >
               <Trash2 className="w-4 h-4" />
