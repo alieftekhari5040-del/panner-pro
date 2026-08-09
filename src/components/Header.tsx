@@ -96,12 +96,13 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="w-full mb-6 flex flex-col gap-5">
-      {/* UPGRADED Executive Floating Command Bar (Single row, zero clutter) */}
-      <div className="no-print flex flex-col lg:flex-row items-center justify-between gap-4 bg-[#110a2c]/85 border border-purple-500/40 rounded-2xl p-3.5 sm:px-5 backdrop-blur-2xl shadow-[0_4px_30px_rgba(139,92,246,0.25)]">
-        {/* Right Section (in RTL): Personal Identity + UPGRADED LIVE CLOCK */}
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 w-full lg:w-auto">
+      {/* UPGRADED Perfectly Organized Executive Command Bar (Single horizontal row, perfectly aligned left & right) */}
+      <div className="no-print flex flex-wrap items-center justify-between gap-3 bg-[#110a2c]/85 border border-purple-500/40 rounded-2xl px-4 py-2.5 backdrop-blur-2xl shadow-[0_4px_30px_rgba(139,92,246,0.25)] w-full">
+        
+        {/* RIGHT GROUP (in RTL): Personal Identity + UPGRADED LIVE CLOCK */}
+        <div className="flex items-center gap-2.5">
           {/* Personalized Profile Greeting Badge */}
-          <div className="flex items-center gap-2 bg-gradient-to-r from-purple-900/60 to-indigo-950/60 border border-purple-400/40 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm text-purple-100 shadow-sm">
+          <div className="flex items-center gap-1.5 bg-purple-900/50 border border-purple-400/40 px-3 py-1.5 rounded-xl text-xs sm:text-sm text-purple-100 shadow-sm">
             {greeting.icon}
             {isEditingName ? (
               <input
@@ -110,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onChange={(e) => setProfileName(e.target.value)}
                 onBlur={() => setIsEditingName(false)}
                 onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
-                className="bg-purple-950 px-2 py-0.5 rounded text-white outline-none w-32 text-xs sm:text-sm font-bold"
+                className="bg-purple-950 px-2 py-0.5 rounded text-white outline-none w-28 text-xs sm:text-sm font-bold"
                 autoFocus
               />
             ) : (
@@ -125,66 +126,70 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
-          {/* UPGRADED Executive Digital Watch Badge (THEY LOVED THE CLOCK!) */}
-          <div className="flex items-center gap-2 bg-gradient-to-r from-purple-950/90 via-indigo-950/90 to-purple-950/90 border border-orange-400/50 shadow-[0_0_18px_rgba(249,115,22,0.25)] px-4 py-1.5 rounded-xl font-mono text-sm sm:text-base font-extrabold text-orange-300 tracking-wider">
-            <ClockIcon className="w-4 h-4 text-orange-400 animate-pulse" />
+          {/* Executive Digital Watch Badge */}
+          <div className="flex items-center gap-1.5 bg-gradient-to-r from-purple-950/90 via-indigo-950/90 to-purple-950/90 border border-orange-400/50 shadow-[0_0_15px_rgba(249,115,22,0.25)] px-3.5 py-1.5 rounded-xl font-mono text-xs sm:text-sm font-extrabold text-orange-300 tracking-wider">
+            <ClockIcon className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
             <span>{clockStr}</span>
           </div>
         </div>
 
-        {/* Center Section: UPGRADED Lively Today Schedule Progress Bar */}
-        <div
-          className="flex items-center gap-3 bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-purple-900/90 border border-purple-400/60 px-4 py-2 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:shadow-[0_0_28px_rgba(168,85,247,0.7)] transition-all duration-300 group cursor-default w-full sm:w-auto justify-center"
-          title={`وضعیت برنامه‌ی امروز: ${completedScheduleCount} از ${totalScheduleCount} ردیف انجام شده است`}
-        >
-          <Sparkles className="w-4 h-4 text-orange-400 animate-spin" style={{ animationDuration: '8s' }} />
-          <span className="text-xs sm:text-sm font-bold text-purple-100 flex items-center gap-1.5">
-            <span>تکمیل امروز:</span>
-            <strong className="text-white font-extrabold">{progressPercent}٪</strong>
-          </span>
-          {/* Animated Moving Gradient Fill Bar */}
-          <div className="w-28 sm:w-36 bg-purple-950/90 rounded-full h-3 overflow-hidden ml-1 border border-purple-400/40 shadow-inner">
-            <div
-              className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 bg-[length:200%_100%] animate-gradient h-full transition-all duration-500 ease-out shadow-[0_0_12px_rgba(249,115,22,0.8)]"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          {totalScheduleCount > 0 && (
-            <span className="text-xs font-bold text-purple-200 bg-purple-950/70 px-2.5 py-0.5 rounded-full border border-purple-500/40">
-              {completedScheduleCount}/{totalScheduleCount} ردیف
+        {/* LEFT GROUP (in RTL): Lively Today Schedule Progress Bar + Minimalist Controls */}
+        <div className="flex items-center gap-2.5">
+          {/* Upgraded Lively Today Schedule Progress Bar */}
+          <div
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-purple-900/90 border border-purple-400/60 px-3.5 py-1.5 rounded-xl shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_22px_rgba(168,85,247,0.7)] transition-all duration-300 group cursor-default"
+            title={`وضعیت برنامه‌ی امروز: ${completedScheduleCount} از ${totalScheduleCount} ردیف انجام شده است`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-orange-400 animate-spin" style={{ animationDuration: '8s' }} />
+            <span className="text-xs sm:text-sm font-bold text-purple-100 flex items-center gap-1">
+              <span>تکمیل امروز:</span>
+              <strong className="text-white font-extrabold">{progressPercent}٪</strong>
             </span>
-          )}
+            {/* Animated Moving Gradient Fill Bar */}
+            <div className="w-20 sm:w-28 bg-purple-950/90 rounded-full h-2.5 overflow-hidden border border-purple-400/40 shadow-inner">
+              <div
+                className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 bg-[length:200%_100%] animate-gradient h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(249,115,22,0.8)]"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            {totalScheduleCount > 0 && (
+              <span className="text-[11px] font-bold text-purple-200 bg-purple-950/70 px-2 py-0.5 rounded-full border border-purple-500/40 hidden md:inline-block">
+                {completedScheduleCount}/{totalScheduleCount} ردیف
+              </span>
+            )}
+          </div>
+
+          {/* Minimalist Utility Group (Shortcuts, Sound, Reset) */}
+          <div className="flex items-center gap-1 bg-purple-950/60 p-1 rounded-xl border border-purple-500/35">
+            {/* Shortcuts Help */}
+            <button
+              onClick={onOpenShortcutsModal}
+              className="p-1.5 rounded-lg hover:bg-purple-800/60 text-purple-200 hover:text-white transition-colors"
+              title="کلیدهای میانبر لپ‌تاپ (Shortcuts)"
+            >
+              <Keyboard className="w-4 h-4 text-purple-300" />
+            </button>
+
+            {/* Sound Toggle */}
+            <button
+              onClick={onToggleSound}
+              className="p-1.5 rounded-lg hover:bg-purple-800/60 text-purple-300 hover:text-white transition-colors"
+              title={soundEnabled ? 'صدا روشن' : 'صدا خاموش'}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-300" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
+            </button>
+
+            {/* Reset Today */}
+            <button
+              onClick={onReset}
+              className="p-1.5 rounded-lg hover:bg-red-900/60 text-purple-300 hover:text-red-300 transition-colors"
+              title="بازنشانی برنامه‌ی امروز"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Left Section (in RTL): Ultra-Minimalist Utility Controls (Shortcuts, Sound, Reset) */}
-        <div className="flex items-center gap-1.5 bg-purple-950/60 p-1.5 rounded-xl border border-purple-500/35">
-          {/* Shortcuts Help */}
-          <button
-            onClick={onOpenShortcutsModal}
-            className="p-2 rounded-lg hover:bg-purple-800/60 text-purple-200 hover:text-white transition-colors"
-            title="کلیدهای میانبر لپ‌تاپ (Shortcuts)"
-          >
-            <Keyboard className="w-4 h-4 text-purple-300" />
-          </button>
-
-          {/* Sound Toggle */}
-          <button
-            onClick={onToggleSound}
-            className="p-2 rounded-lg hover:bg-purple-800/60 text-purple-300 hover:text-white transition-colors"
-            title={soundEnabled ? 'صدا روشن' : 'صدا خاموش'}
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4 text-purple-300" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
-          </button>
-
-          {/* Reset Today */}
-          <button
-            onClick={onReset}
-            className="p-2 rounded-lg hover:bg-red-900/60 text-purple-300 hover:text-red-300 transition-colors"
-            title="بازنشانی برنامه‌ی امروز"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
       </div>
 
       {/* Main Poster Header Row (Matches Vitto Season Planner poster exact layout) */}
