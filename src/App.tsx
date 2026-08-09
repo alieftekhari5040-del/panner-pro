@@ -8,7 +8,6 @@ import { playCheckSound } from './utils/sound';
 import { Header } from './components/Header';
 import { Tabs, type TabId } from './components/Tabs';
 import { DateWeekBar } from './components/DateWeekBar';
-import { OneBigThing } from './components/OneBigThing';
 import { PrioritiesCard } from './components/PrioritiesCard';
 import { GoalsCard } from './components/GoalsCard';
 import { ScheduleCard } from './components/ScheduleCard';
@@ -32,7 +31,6 @@ export default function App() {
   const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const [isQuickNoteModalOpen, setIsQuickNoteModalOpen] = useState(false);
-  const [oneBigThingCompleted, setOneBigThingCompleted] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
 
   // Listen for PWA desktop install prompt
@@ -109,17 +107,6 @@ export default function App() {
   // Handler: Change Date String manually
   const handleDateChange = (newDate: string) => {
     setData((prev) => ({ ...prev, dateStr: newDate }));
-  };
-
-  // Handler: Change One Big Thing
-  const handleChangeOneBigThing = (text: string) => {
-    setData((prev) => ({ ...prev, oneBigThing: text }));
-  };
-
-  // Handler: Toggle One Big Thing Completed
-  const handleToggleOneBigThing = () => {
-    playCheckSound(soundEnabled);
-    setOneBigThingCompleted((prev) => !prev);
   };
 
   // Handler: Select Weekday
@@ -404,14 +391,6 @@ export default function App() {
               onPrevDay={handlePrevDay}
               onNextDay={handleNextDay}
               onToday={handleToday}
-            />
-
-            {/* One Big Thing (#1 Executive Focus for Today) */}
-            <OneBigThing
-              text={data.oneBigThing || ''}
-              onChange={handleChangeOneBigThing}
-              completed={oneBigThingCompleted}
-              onToggle={handleToggleOneBigThing}
             />
 
             {/* Main Content Area: Full-width ScheduleCard, then Priorities & Goals side-by-side below it */}
