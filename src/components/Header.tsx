@@ -14,6 +14,7 @@ import {
   Keyboard,
   FileText,
   Edit2,
+  CheckCircle2,
 } from 'lucide-react';
 import { playCheckSound } from '../utils/sound';
 
@@ -173,6 +174,26 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-1.5">
+          {/* Permanent Reassuring AUTO-SAVE ACTIVE Indicator Badge */}
+          <div
+            onClick={onOpenStorageModal}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-500/50 text-xs font-bold text-emerald-300 cursor-pointer hover:bg-emerald-900/60 transition-colors shadow-sm"
+            title="تمامی اطلاعات و تغییرات شما به‌صورت خودکار در مرورگر ذخیره می‌شوند (کلیک برای پشتیبان‌گیری)"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+            <span>ذخیره خودکار فعال ✅</span>
+          </div>
+
+          {/* Backup / Restore Button */}
+          <button
+            onClick={onOpenStorageModal}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
+            title="تهیه فایل پشتیبان از تمام داده‌ها (Backup / Restore JSON)"
+          >
+            <HardDrive className="w-3.5 h-3.5 text-purple-300" />
+            <span className="hidden sm:inline">پشتیبان‌گیری</span>
+          </button>
+
           {/* Quick Note Scratchpad */}
           <button
             onClick={onOpenQuickNoteModal}
@@ -190,16 +211,6 @@ export const Header: React.FC<HeaderProps> = ({
             title="کلیدهای میانبر لپ‌تاپ (Shortcuts)"
           >
             <Keyboard className="w-4 h-4 text-purple-300" />
-          </button>
-
-          {/* Persistent Storage Status & Backup button */}
-          <button
-            onClick={onOpenStorageModal}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-purple-900/50 hover:bg-purple-800/70 border border-purple-400/35 text-xs font-medium text-purple-100 transition-colors shadow-sm"
-            title="وضعیت ذخیره‌سازی در مرورگر و تهیه‌ی فایل پشتیبان (Backup / Restore)"
-          >
-            <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden sm:inline">ذخیره در مرورگر</span>
           </button>
 
           {/* Install on Desktop button */}

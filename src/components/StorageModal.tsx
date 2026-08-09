@@ -1,5 +1,5 @@
 import React from 'react';
-import { Save, Download, Upload, X, CheckCircle2, ShieldCheck, HardDrive } from 'lucide-react';
+import { Download, Upload, X, ShieldCheck, HardDrive } from 'lucide-react';
 import { ALL_WEEKDAYS } from '../utils/jalali';
 import { loadDayData, saveDayData } from '../utils/storage';
 
@@ -19,11 +19,9 @@ export const StorageModal: React.FC<StorageModalProps> = ({
   const handleExportBackup = () => {
     try {
       const backup: Record<string, unknown> = {};
-      // Collect all 7 days
       ALL_WEEKDAYS.forEach((day) => {
         backup[`day_${day}`] = loadDayData(day);
       });
-      // Collect habits
       const habits = localStorage.getItem('ascent_blueprint_habits_v2');
       if (habits) {
         backup['habits'] = JSON.parse(habits);
@@ -79,7 +77,7 @@ export const StorageModal: React.FC<StorageModalProps> = ({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 left-4 p-1 rounded-lg text-purple-400 hover:text-white hover:bg-purple-900/50 transition-colors"
+          className="absolute top-4 left-4 p-1.5 rounded-lg text-purple-400 hover:text-white hover:bg-purple-900/50 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -91,23 +89,23 @@ export const StorageModal: React.FC<StorageModalProps> = ({
           </div>
           <div>
             <h3 className="text-xl font-bold text-white tracking-wide">
-              ذخیره‌سازی و پشتیبان‌گیری
+              پشتیبان‌گیری و بازیابی اطلاعات
             </h3>
             <p className="text-xs text-purple-300/80">
-              مدیریت حافظه مرورگر و انتقال اطلاعات برنامه
+              انتقال و نگهداری فایل آفلاین از داده‌های برنامه
             </p>
           </div>
         </div>
 
         {/* Status Indicator */}
-        <div className="bg-purple-950/60 border border-purple-500/40 p-4 rounded-2xl flex items-center gap-3">
+        <div className="bg-emerald-950/50 border border-emerald-500/40 p-4 rounded-2xl flex items-center gap-3">
           <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
           <div className="text-xs text-purple-100">
             <p className="font-bold text-emerald-300 text-sm">
               ذخیره‌سازی خودکار مرورگر فعال است ✅
             </p>
-            <p className="mt-0.5 text-purple-300/90 leading-relaxed">
-              تمامی کارها، اهداف، برنامه‌ها و عادت‌های روزانه شما به‌صورت بلادرنگ در حافظه محلی مرورگر (LocalStorage) ذخیره می‌شوند.
+            <p className="mt-1 text-purple-200/90 leading-relaxed">
+              تمامی کارهای شما به‌صورت خودکار و بلادرنگ در حافظه مرورگر (LocalStorage) ذخیره می‌شوند. نیازی به ذخیره‌سازی دستی نیست!
             </p>
           </div>
         </div>
