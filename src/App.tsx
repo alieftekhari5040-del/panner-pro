@@ -319,10 +319,27 @@ export default function App() {
           onSelectWeekday={handleSelectWeekday}
         />
 
-        {/* Two-column Main Content Area (Matches poster 2-column grid layout) */}
+        {/* Two-column Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-          {/* Right Column in RTL (Priorities, Goals, Habits) - 5/12 width on lg */}
+          {/* Right Column in RTL (Habits) - 5/12 width on lg */}
           <div className="lg:col-span-5 flex flex-col gap-6">
+            <HabitsCard
+              habits={data.habits}
+              onToggle={handleToggleHabit}
+              onAddHabit={handleAddHabit}
+              onRemoveHabit={handleRemoveHabit}
+            />
+          </div>
+
+          {/* Left Column in RTL (Schedule -> below it: Priorities and Goals) - 7/12 width on lg */}
+          <div className="lg:col-span-7 flex flex-col gap-6">
+            <ScheduleCard
+              schedule={data.schedule}
+              onChangeTask={handleChangeSlotTask}
+              onToggleSlot={handleToggleSlot}
+              onAddSlot={handleAddSlot}
+              onRemoveSlot={handleRemoveSlot}
+            />
             <PrioritiesCard
               priorities={data.priorities}
               onToggle={handleTogglePriority}
@@ -335,23 +352,6 @@ export default function App() {
               onChangeText={handleChangeGoalText}
               onAddGoal={handleAddGoal}
               onRemoveGoal={handleRemoveGoal}
-            />
-            <HabitsCard
-              habits={data.habits}
-              onToggle={handleToggleHabit}
-              onAddHabit={handleAddHabit}
-              onRemoveHabit={handleRemoveHabit}
-            />
-          </div>
-
-          {/* Left Column in RTL (Schedule / Hourly Timeline) - 7/12 width on lg */}
-          <div className="lg:col-span-7 flex flex-col">
-            <ScheduleCard
-              schedule={data.schedule}
-              onChangeTask={handleChangeSlotTask}
-              onToggleSlot={handleToggleSlot}
-              onAddSlot={handleAddSlot}
-              onRemoveSlot={handleRemoveSlot}
             />
           </div>
         </div>
