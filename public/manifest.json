@@ -1,0 +1,17 @@
+{
+  "name": "پنر پرو - گیمیفیکیشن چالش‌ها",
+  "short_name": "پنر پرو",
+  "description": "سیستم گیمیفیکیشن حرفه‌ای برای مدیریت چالش‌ها و کسب مدال",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0f0f23",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
